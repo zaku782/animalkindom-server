@@ -3,7 +3,6 @@ package com.zhgame.animalkindom.animal.entity;
 import com.zhgame.animalkindom.GameConfig;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.CalculateTool;
-import com.zhgame.animalkindom.tools.RandomTool;
 
 import javax.persistence.*;
 
@@ -16,11 +15,8 @@ public class Animal {
     private Long id;
 
     private static int INIT_VIGOUR = 100;
-    private static float FEMALE_REDUCTION = 0.7f;
-    private static float FEMALE_GAIN = 1.2f;
 
     private String name;
-    private Integer gender;
     private Integer health;
     private Integer baseHealth;
     private Integer satiety;
@@ -32,8 +28,8 @@ public class Animal {
     private Integer speed;
     private Long accountId;
     private Long typeId;
-    private Integer level;
-    private Integer levelStep;
+    private Integer growLevel;
+    private Integer maxGrowLevel;
     private Long sleepTime;
     private Long exploreTime;
     private Integer currentPos;
@@ -58,26 +54,12 @@ public class Animal {
         this.agile = animalData.getBaseAgile();
         this.speed = animalData.getBaseSpeed();
         this.typeId = animalData.getId();
-        this.level = 0;
-        this.levelStep = animalData.getBaseLevelStep();
-        this.gender = RandomTool.random.nextInt(2);
+        this.growLevel = 1;
+        this.maxGrowLevel = animalData.getMaxGrowLevel();
         this.currentPos = 0;
         BitArray mapDiscovered = new BitArray(GameConfig.initMapCapacity);
         mapDiscovered.set(0, true);
         this.mapDiscovered = mapDiscovered.getBits();
-        femalePropertyConvert(this);
-    }
-
-    private void femalePropertyConvert(Animal animal) {
-        if (animal.gender == 0) {
-            this.baseHealth = convert(FEMALE_REDUCTION, this.baseHealth);
-            this.health = this.baseHealth;
-            this.baseSatiety = convert(FEMALE_REDUCTION, this.baseSatiety);
-            this.satiety = this.baseSatiety;
-            this.strength = convert(FEMALE_REDUCTION, this.strength);
-            this.intelligence = convert(FEMALE_GAIN, this.intelligence);
-            this.agile = convert(FEMALE_GAIN, this.agile);
-        }
     }
 
     private Integer convert(float multi, Integer value) {
@@ -100,14 +82,6 @@ public class Animal {
         this.name = name;
     }
 
-    public Integer getGender() {
-        return gender;
-    }
-
-    public void setGender(Integer gender) {
-        this.gender = gender;
-    }
-
     public Long getTypeId() {
         return typeId;
     }
@@ -116,20 +90,20 @@ public class Animal {
         this.typeId = typeId;
     }
 
-    public Integer getLevel() {
-        return level;
+    public Integer getGrowLevel() {
+        return growLevel;
     }
 
-    public void setLevel(Integer level) {
-        this.level = level;
+    public void setGrowLevel(Integer growLevel) {
+        this.growLevel = growLevel;
     }
 
-    public Integer getLevelStep() {
-        return levelStep;
+    public Integer getMaxGrowLevel() {
+        return maxGrowLevel;
     }
 
-    public void setLevelStep(Integer levelStep) {
-        this.levelStep = levelStep;
+    public void setMaxGrowLevel(Integer maxGrowLevel) {
+        this.maxGrowLevel = maxGrowLevel;
     }
 
     public Integer getHealth() {

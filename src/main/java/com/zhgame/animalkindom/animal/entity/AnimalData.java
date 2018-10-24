@@ -16,7 +16,7 @@ public class AnimalData {
     private Integer baseIntelligence;
     private Integer baseAgile;
     private Integer baseSpeed;
-    private Integer baseLevelStep;
+    private Integer maxGrowLevel;
 
     public Long getId() {
         return id;
@@ -74,12 +74,12 @@ public class AnimalData {
         this.baseSpeed = baseSpeed;
     }
 
-    public Integer getBaseLevelStep() {
-        return baseLevelStep;
+    public Integer getMaxGrowLevel() {
+        return maxGrowLevel;
     }
 
-    public void setBaseLevelStep(Integer baseLevelStep) {
-        this.baseLevelStep = baseLevelStep;
+    public void setMaxGrowLevel(Integer maxGrowLevel) {
+        this.maxGrowLevel = maxGrowLevel;
     }
 
     public Integer getBaseSatiety() {
