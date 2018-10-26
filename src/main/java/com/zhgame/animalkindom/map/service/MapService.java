@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 @Component
 public class MapService {
 
-    //calculate map numbers round the given map number-------start------------------------
+    //cal map numbers round the given map number-------start------------------------
     private int loop2Count(int loop) {
         return (int) Math.pow(3 + 2 * (loop - 1), 2);
     }
@@ -102,11 +102,11 @@ public class MapService {
                 bias = loopCorner.get(1) - number;
                 return new int[]{inLoopCorner.get(1) - (bias - 1), number - 1, outLoopCorner.get(1) - (bias + 1), number + 1};
             case "right":
-                bias = loopCorner.get(0) - number;
+                bias = loopCorner.get(3) - number;
                 return new int[]{outLoopCorner.get(3) - (bias + 1), number + 1, inLoopCorner.get(3) - (bias - 1), number - 1};
             default:
                 return new int[]{};
         }
     }
-    //calculate map numbers around the given map number-------end------------------------
+    //cal map numbers round the given map number-------end------------------------
 }
