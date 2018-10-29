@@ -59,6 +59,19 @@ public class Animal {
         this.currentPos = 0;
         BitArray mapDiscovered = new BitArray(GameConfig.initMapCapacity);
         mapDiscovered.set(0, true);
+        mapDiscovered.set(1, true);
+        mapDiscovered.set(2, true);
+        mapDiscovered.set(5, true);
+        mapDiscovered.set(6, true);
+        mapDiscovered.set(7, true);
+        mapDiscovered.set(11, true);
+        mapDiscovered.set(13, true);
+        mapDiscovered.set(14, true);
+        mapDiscovered.set(19, true);
+        mapDiscovered.set(21, true);
+        mapDiscovered.set(22, true);
+        mapDiscovered.set(23, true);
+        mapDiscovered.set(46, true);
         this.mapDiscovered = mapDiscovered.getBits();
     }
 

@@ -1,15 +1,47 @@
 package com.zhgame.animalkindom.map.service;
 
+import com.zhgame.animalkindom.animal.entity.Animal;
+import com.zhgame.animalkindom.map.entity.Map;
+import com.zhgame.animalkindom.tools.BitArray;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class MapService {
+
+    private static List<Map> mapData = new ArrayList();
+
+    public List<Map> getMapData() {
+        if (mapData.size() == 0) {
+            mapData = mapRepository.findAll();
+        }
+        return mapData;
+    }
+
+    public List<Map> getMaps(Animal animal) {
+        Integer currentMap = animal.getCurrentPos();
+
+        byte[] mapDiscovered = animal.getMapDiscovered();
+        BitArray bitArray = new BitArray(mapDiscovered);
+        List<Integer> mapDiscoveredIds = new ArrayList<>();
+        bitArray.forEach((id, discovered) -> {
+            if (discovered) {
+                mapDiscoveredIds.add(id);
+            }
+        });
+        List<Map> mapData = getMapData();
+        List<Map> mapDiscoveredList = mapData.stream().filter(map -> mapDiscoveredIds.contains(map.getId())).collect(toList());
+        mapDiscoveredList.add(0, mapData.get(currentMap));
+        return mapDiscoveredList;
+    }
 
     //cal map numbers round the given map number-------start------------------------
     private int loop2Count(int loop) {
@@ -31,7 +63,7 @@ public class MapService {
         if (loop == 0) {
             return Arrays.asList(0, 0, 0, 0);
         }
-        return Stream.iterate(loop2Count(loop) - 1, n -> n - loop * 2).limit(4).collect(Collectors.toList());
+        return Stream.iterate(loop2Count(loop) - 1, n -> n - loop * 2).limit(4).collect(toList());
     }
 
     private String moveDirection(int number) {
@@ -109,4 +141,7 @@ public class MapService {
         }
     }
     //cal map numbers round the given map number-------end------------------------
+
+    @Resource
+    private MapRepository mapRepository;
 }
