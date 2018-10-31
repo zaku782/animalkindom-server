@@ -1,8 +1,13 @@
 package com.zhgame.animalkindom.map.service;
 
+import com.zhgame.animalkindom.GameConfig;
 import com.zhgame.animalkindom.animal.entity.Animal;
+import com.zhgame.animalkindom.animal.service.AnimalRepository;
 import com.zhgame.animalkindom.map.entity.Map;
 import com.zhgame.animalkindom.tools.BitArray;
+import com.zhgame.animalkindom.tools.CalculateTool;
+import com.zhgame.animalkindom.tools.DateTool;
+import com.zhgame.animalkindom.tools.NetMessage;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -28,7 +33,6 @@ public class MapService {
 
     public List<Map> getMaps(Animal animal) {
         Integer currentMap = animal.getCurrentPos();
-
         byte[] mapDiscovered = animal.getMapDiscovered();
         BitArray bitArray = new BitArray(mapDiscovered);
         List<Integer> mapDiscoveredIds = new ArrayList<>();
@@ -39,8 +43,41 @@ public class MapService {
         });
         List<Map> mapData = getMapData();
         List<Map> mapDiscoveredList = mapData.stream().filter(map -> mapDiscoveredIds.contains(map.getId())).collect(toList());
-        mapDiscoveredList.add(0, mapData.get(currentMap));
+        mapDiscoveredList.add(0, mapData.stream().filter(map -> map.getId().intValue() == currentMap.intValue()).findFirst().get());
         return mapDiscoveredList;
+    }
+
+    public NetMessage enter(Animal animal, int mapId) {
+        //check move
+        int[] round = round(animal.getCurrentPos());
+        byte[] mapDiscovered = animal.getMapDiscovered();
+        BitArray bitArray = new BitArray(mapDiscovered);
+        if (Arrays.stream(round).anyMatch(i -> i == mapId) && bitArray.get(mapId)) {
+            long last = animal.getMoveTime();
+            long now = DateTool.getNowMillis();
+            long between = now - last;
+            if (between / 1000 < GameConfig.mapMoveInterval) {
+                return new NetMessage(NetMessage.MAP_MOVE_WAIT, NetMessage.WARNING);
+            }
+
+            System.out.println(GameConfig.moveSatietyCostPercent + "     " + animal.getBaseSatiety());
+            Integer needSatiety = CalculateTool.calToInteger(GameConfig.moveSatietyCostPercent * animal.getBaseSatiety());
+
+            if (animal.getSatiety() < needSatiety) {
+                return new NetMessage(NetMessage.NOT_ENOUGH_SATIETY, NetMessage.WARNING);
+            }
+            if (animal.getVigour() < GameConfig.moveVigourCost) {
+                return new NetMessage(NetMessage.NOT_ENOUGH_VIGOUR, NetMessage.WARNING);
+            }
+            animal.setSatiety(animal.getSatiety() - needSatiety);
+            animal.setVigour(animal.getVigour() - GameConfig.moveVigourCost);
+            animal.setCurrentPos(mapId);
+            animal.setMoveTime(now);
+            animalRepository.save(animal);
+        } else {
+            return new NetMessage(NetMessage.STATUS_INVALID_OPERATION, NetMessage.DANGER);
+        }
+        return new NetMessage("", NetMessage.SUCCESS);
     }
 
     //cal map numbers round the given map number-------start------------------------
@@ -144,4 +181,6 @@ public class MapService {
 
     @Resource
     private MapRepository mapRepository;
+    @Resource
+    private AnimalRepository animalRepository;
 }

@@ -2,6 +2,7 @@ package com.zhgame.animalkindom.animal.controller;
 
 import com.zhgame.animalkindom.account.service.AccountService;
 import com.zhgame.animalkindom.animal.entity.Animal;
+import com.zhgame.animalkindom.animal.entity.SleepEnd;
 import com.zhgame.animalkindom.animal.service.AnimalService;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.NetMessage;
@@ -27,8 +28,8 @@ public class AnimalController {
     @RequestMapping("/animal/sleep/")
     public NetMessage sleep(HttpServletRequest request) throws Exception {
         Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
-        animalService.sleep(animal);
-        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+        SleepEnd sleepEnd = animalService.sleep(animal);
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, sleepEnd);
     }
 
     @Resource

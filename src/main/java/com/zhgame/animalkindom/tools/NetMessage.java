@@ -12,6 +12,9 @@ public class NetMessage {
     public static String STATUS_INVALID_OPERATION = "invalid_operation";
     public static String STATUS_LOGIN_STATUS_ERROR = "login_status_error";
     public static String STATUS_OK = "ok";
+    public static String MAP_MOVE_WAIT = "map_move_wait";
+    public static String NOT_ENOUGH_SATIETY = "not_enough_satiety";
+    public static String NOT_ENOUGH_VIGOUR = "not_enough_vigour";
 
     private String type;
     private String content;

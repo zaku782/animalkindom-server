@@ -6,6 +6,7 @@ import com.zhgame.animalkindom.animal.service.AnimalService;
 import com.zhgame.animalkindom.tools.CookieTool;
 import com.zhgame.animalkindom.tools.MD5Tool;
 import com.zhgame.animalkindom.tools.NetMessage;
+import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -121,15 +122,6 @@ public class AccountService {
         return new NetMessage("ok", NetMessage.SUCCESS);
     }
 
-    /**
-     * <p>
-     * Description:get current login account
-     * </p>
-     *
-     * @param request *
-     * @return *
-     * @throws Exception *
-     */
     public Account getLoginAccount(HttpServletRequest request) throws Exception {
         Object accountId = request.getSession().getAttribute("login_account");
         if (accountId != null) {
@@ -143,17 +135,17 @@ public class AccountService {
      * Description:record session and cookie
      * </p>
      *
-     * @param request *
+     * @param request  *
      * @param response *
-     * @param account *
+     * @param account  *
      * @throws Exception *
      */
     public void LogAccount(HttpServletRequest request, HttpServletResponse response, Account account) throws Exception {
         String tokenOri = account.getName() + new Date().getTime() + CookieTool.getIpAddr(request);
         String token = MD5Tool.getEncrypted(tokenOri);
-        account.setToken(token);
-        CookieTool.setCookies(response, "ak_cookie", account.getName() + ":" + token);
+        CookieTool.setCookies(response, "ak_token", token);
         request.getSession().setAttribute("login_account", account.getId());
+        redisTool.set(token, account.getId(), 300);
     }
 
     private void clearAccount(HttpServletRequest request, HttpServletResponse response) {
@@ -170,8 +162,14 @@ public class AccountService {
         account.setSalt(salt);
     }
 
+    public RedisTool getRedisTool() {
+        return redisTool;
+    }
+
     @Resource
     private AccountRepository accountRepository;
     @Resource
     private AnimalService animalService;
+    @Resource
+    private RedisTool redisTool;
 }

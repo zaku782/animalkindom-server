@@ -26,6 +26,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-configuration-processor')
+    compile('org.springframework.boot:spring-boot-starter-data-redis')
+    compile('org.springframework.data:spring-data-redis')
     testCompile("org.springframework.boot:spring-boot-starter-test")
     compile('com.google.code.gson:gson:2.3.1')
     compile('com.fasterxml.jackson.core:jackson-databind:2.8.4')

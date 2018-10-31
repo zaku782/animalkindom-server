@@ -55,28 +55,22 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                 response.setHeader("Access-Control-Allow-Credentials", "true");
                 //response.setHeader("Access-Control-Allow-Origin", "http://www.animalkindom.win");
                 response.setHeader("Access-Control-Allow-Origin", "http://localhost:8888");
-
                 if (request.getRequestURL().indexOf("/signIn/") == -1
                         && request.getRequestURL().indexOf("/signOut/") == -1
                         && request.getRequestURL().indexOf("/signUp/") == -1) {
                     boolean isLogin = true;
                     Account account = accountService.getLoginAccount(request);
                     if (account == null) {
-                        Optional<String> cookie = CookieTool.getCookies(request, "ak_cookie");
+                        Optional<String> cookie = CookieTool.getCookies(request, "ak_token");
                         if (!cookie.isPresent()) {
                             isLogin = false;
                         } else {
-                            String name = cookie.get().split(":")[0];
-                            String token = cookie.get().split(":")[1];
-                            Account accountDB = accountService.getByName(name);
-                            if (accountDB == null) {
-                                isLogin = false;
+                            String token = cookie.get();
+                            Object accountId = accountService.getRedisTool().get(token);
+                            if (accountId != null) {
+                                request.getSession().setAttribute("login_account", accountId);
                             } else {
-                                if (!accountDB.getToken().equals(token)) {
-                                    isLogin = false;
-                                } else {
-                                    request.getSession().setAttribute("login_account", accountDB.getId());
-                                }
+                                isLogin = false;
                             }
                         }
                     }

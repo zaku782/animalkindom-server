@@ -34,6 +34,7 @@ public class Animal {
     private Long exploreTime;
     private Integer currentPos;
     private byte[] mapDiscovered;
+    private Long moveTime;
 
     @Transient
     private String accountName;
@@ -245,5 +246,13 @@ public class Animal {
 
     public void setMapDiscovered(byte[] mapDiscovered) {
         this.mapDiscovered = mapDiscovered;
+    }
+
+    public Long getMoveTime() {
+        return moveTime;
+    }
+
+    public void setMoveTime(Long moveTime) {
+        this.moveTime = moveTime;
     }
 }
