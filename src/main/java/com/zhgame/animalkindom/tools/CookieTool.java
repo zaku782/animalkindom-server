@@ -13,15 +13,17 @@ import java.util.regex.Pattern;
 
 public class CookieTool {
 
+    public static int COOKIE_TIME = 60 * 60 * 24 * 3;
+
     public static Optional<String> getCookies(HttpServletRequest request, String key)
             throws Exception {
         Cookie[] cookies = request.getCookies();
         if (null != cookies && cookies.length > 0) {
             Optional<Cookie> cookie = Arrays.stream(cookies)
                     .filter(c -> c.getName().equals(key) && c.getValue() != null && !c.getValue().equals(""))
-			        .findFirst();
+                    .findFirst();
 
-            if(cookie.isPresent()){
+            if (cookie.isPresent()) {
                 return Optional.of(URLDecoder.decode(cookie.get().getValue(), "utf-8"));
             }
         }
@@ -34,7 +36,7 @@ public class CookieTool {
         value = URLEncoder.encode(value, "UTF-8");
         Cookie cookie = new Cookie(key, value);
         cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 3);
+        cookie.setMaxAge(COOKIE_TIME);
         response.addCookie(cookie);
     }
 

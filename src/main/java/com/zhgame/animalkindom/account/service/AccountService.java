@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class AccountService {
@@ -103,14 +103,10 @@ public class AccountService {
         if (message != null) {
             return message;
         }
-
         encrypt(account);
         Account accountDb = accountRepository.save(account);
-        //create an animal associate with the account
         Animal animal = animalService.createAnimal(account);
         animalService.save(animal);
-
-
         this.LogAccount(request, response, accountDb);
 
         return new NetMessage("ok", NetMessage.SUCCESS);
@@ -123,11 +119,7 @@ public class AccountService {
     }
 
     public Account getLoginAccount(HttpServletRequest request) throws Exception {
-        Object accountId = request.getSession().getAttribute("login_account");
-        if (accountId != null) {
-            return getById(Long.parseLong(accountId.toString()));
-        }
-        return null;
+        return (Account) request.getSession().getAttribute("login_account");
     }
 
     /**
@@ -141,11 +133,11 @@ public class AccountService {
      * @throws Exception *
      */
     public void LogAccount(HttpServletRequest request, HttpServletResponse response, Account account) throws Exception {
-        String tokenOri = account.getName() + new Date().getTime() + CookieTool.getIpAddr(request);
-        String token = MD5Tool.getEncrypted(tokenOri);
+        String token = UUID.randomUUID().toString();
         CookieTool.setCookies(response, "ak_token", token);
-        request.getSession().setAttribute("login_account", account.getId());
-        redisTool.set(token, account.getId(), 300);
+        Account accountSession = new Account(account.getId(), account.getName());
+        request.getSession().setAttribute("login_account", accountSession);
+        redisTool.set(token, accountSession, CookieTool.COOKIE_TIME);
     }
 
     private void clearAccount(HttpServletRequest request, HttpServletResponse response) {

@@ -66,9 +66,9 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                             isLogin = false;
                         } else {
                             String token = cookie.get();
-                            Object accountId = accountService.getRedisTool().get(token);
-                            if (accountId != null) {
-                                request.getSession().setAttribute("login_account", accountId);
+                            Account accountRedis = (Account) accountService.getRedisTool().get(token);
+                            if (accountRedis != null) {
+                                request.getSession().setAttribute("login_account", accountRedis);
                             } else {
                                 isLogin = false;
                             }
