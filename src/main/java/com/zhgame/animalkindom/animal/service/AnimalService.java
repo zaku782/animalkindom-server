@@ -43,10 +43,12 @@ public class AnimalService {
             int recoverTimes = (int) (DateTool.getNowMillis() - animal.getSleepTime()) / 1000 / GameConfig.sleepVigourRecoverMinInterval;
             if (recoverTimes > 0) {
                 vigourRecover = recoverTimes * GameConfig.sleepVigourRecover;
-                animal.setVigour(Math.min(100, animal.getVigour() + vigourRecover));
-                //醒来时,若因为时间太短导致扣除的饱食度为0,此时要扣除1点
-                satietyCost = Math.max(1, CalculateTool.calToInteger(GameConfig.sleepSatietyCost * animal.getBaseSatiety()) * recoverTimes);
-                animal.setSatiety(animal.getSatiety() - satietyCost);
+                int afterRecover = Math.min(100, animal.getVigour() + vigourRecover);
+                //实际恢复精力
+                vigourRecover = afterRecover - animal.getVigour();
+                animal.setVigour(afterRecover);
+                satietyCost = Math.max(1, CalculateTool.calToInteger(GameConfig.sleepSatietyCost * animal.getBaseSatiety() * recoverTimes));
+                animal.setSatiety(Math.max(0, animal.getSatiety() - satietyCost));
             }
             animal.setSleepTime(null);
         } else {
