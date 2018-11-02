@@ -1,11 +1,10 @@
 package com.zhgame.animalkindom.map.service;
 
-import com.zhgame.animalkindom.GameConfig;
 import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.service.AnimalRepository;
 import com.zhgame.animalkindom.map.entity.Map;
+import com.zhgame.animalkindom.map.entity.MoveEnd;
 import com.zhgame.animalkindom.tools.BitArray;
-import com.zhgame.animalkindom.tools.CalculateTool;
 import com.zhgame.animalkindom.tools.DateTool;
 import com.zhgame.animalkindom.tools.NetMessage;
 import org.springframework.stereotype.Component;
@@ -22,10 +21,10 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class MapService {
 
-    private static List<Map> mapData = new ArrayList();
+    private static List<Map> mapData;
 
     public List<Map> getMapData() {
-        if (mapData.size() == 0) {
+        if (mapData == null) {
             mapData = mapRepository.findAll();
         }
         return mapData;
@@ -53,39 +52,43 @@ public class MapService {
         byte[] mapDiscovered = animal.getMapDiscovered();
         BitArray bitArray = new BitArray(mapDiscovered);
         if (Arrays.stream(round).anyMatch(i -> i == mapId) && bitArray.get(mapId)) {
+
             long last = animal.getMoveTime();
             long now = DateTool.getNowMillis();
             long between = now - last;
-            if (between / 1000 < GameConfig.mapMoveInterval) {
+
+            String satietyCost = gameConfig.get("moveSatietyCost");
+            String vigourCost = gameConfig.get("moveVigourCost");
+
+            if (new BigDecimal(between).divide(new BigDecimal(1000), BigDecimal.ROUND_HALF_UP).intValue() < Integer.parseInt(gameConfig.get("mapMoveInterval"))) {
                 return new NetMessage(NetMessage.MAP_MOVE_WAIT, NetMessage.WARNING);
             }
 
-            System.out.println(GameConfig.moveSatietyCostPercent + "     " + animal.getBaseSatiety());
-            Integer needSatiety = CalculateTool.calToInteger(GameConfig.moveSatietyCostPercent * animal.getBaseSatiety());
+            Integer needSatiety = new BigDecimal(satietyCost).multiply(new BigDecimal(animal.getBaseSatiety())).intValue();
 
             if (animal.getSatiety() < needSatiety) {
                 return new NetMessage(NetMessage.NOT_ENOUGH_SATIETY, NetMessage.WARNING);
             }
-            if (animal.getVigour() < GameConfig.moveVigourCost) {
+            if (animal.getVigour() < Integer.parseInt(vigourCost)) {
                 return new NetMessage(NetMessage.NOT_ENOUGH_VIGOUR, NetMessage.WARNING);
             }
             animal.setSatiety(animal.getSatiety() - needSatiety);
-            animal.setVigour(animal.getVigour() - GameConfig.moveVigourCost);
+            animal.setVigour(animal.getVigour() - Integer.parseInt(vigourCost));
             animal.setCurrentPos(mapId);
             animal.setMoveTime(now);
             animalRepository.save(animal);
+            return new NetMessage("", NetMessage.SUCCESS, new MoveEnd(vigourCost, needSatiety.toString()));
         } else {
             return new NetMessage(NetMessage.STATUS_INVALID_OPERATION, NetMessage.DANGER);
         }
-        return new NetMessage("", NetMessage.SUCCESS);
     }
 
-    //cal map numbers round the given map number-------start------------------------
+
     private int loop2Count(int loop) {
         return (int) Math.pow(3 + 2 * (loop - 1), 2);
     }
 
-    int count2Loop(int count) {
+    private int count2Loop(int count) {
         return new BigDecimal(Math.sqrt(count))
                 .subtract(new BigDecimal(3))
                 .divide(new BigDecimal(2), BigDecimal.ROUND_UP)
@@ -130,10 +133,10 @@ public class MapService {
     }
 
     /**
-     * @param number given pos
-     * @return numbers in pos up/right/down/left
+     * @param number 地图编号
+     * @return 地图上下左右的地图编号
      */
-    int[] round(int number) {
+    private int[] round(int number) {
 
         if (number == 0) {
             return new int[]{1, 3, 5, 7};
@@ -183,4 +186,6 @@ public class MapService {
     private MapRepository mapRepository;
     @Resource
     private AnimalRepository animalRepository;
+    @Resource
+    private java.util.Map<String, String> gameConfig;
 }
