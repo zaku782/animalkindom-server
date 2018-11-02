@@ -1,10 +1,11 @@
 package com.zhgame.animalkindom.animal.entity;
 
-import com.zhgame.animalkindom.GameConfig;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.CalculateTool;
 
+import javax.annotation.Resource;
 import javax.persistence.*;
+import java.util.Map;
 
 @Entity
 @Table(name = "animal")
@@ -58,7 +59,7 @@ public class Animal {
         this.growLevel = 1;
         this.maxGrowLevel = animalData.getMaxGrowLevel();
         this.currentPos = 0;
-        BitArray mapDiscovered = new BitArray(GameConfig.initMapCapacity);
+        BitArray mapDiscovered = new BitArray(Integer.parseInt(gameConfig.get("maxMapNumber")));
         mapDiscovered.set(0, true);
         mapDiscovered.set(1, true);
         mapDiscovered.set(2, true);
@@ -255,4 +256,8 @@ public class Animal {
     public void setMoveTime(Long moveTime) {
         this.moveTime = moveTime;
     }
+
+    @Transient
+    @Resource
+    private Map<String, String> gameConfig;
 }

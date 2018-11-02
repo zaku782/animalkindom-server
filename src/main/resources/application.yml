@@ -22,18 +22,6 @@ server:
 system:
   env: dev
 
-game:
-  maxMapNumber: 4000
-  initMapCapacity: 400
-  #移动
-  mapMoveInterval: 10
-  moveVigourCost: 30
-  moveSatietyCostPercent: 0.2
-  #睡眠
-  sleepVigourRecoverMinInterval: 300 #每5分钟恢复精力/消耗饱食度一次
-  sleepVigourRecover: 1 #每次恢复1点
-  sleepSatietyCost: 0.001 #每次消耗千分之一
-
 
 
 
