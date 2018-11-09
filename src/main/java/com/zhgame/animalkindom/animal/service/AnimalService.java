@@ -95,10 +95,10 @@ public class AnimalService {
             //Test
             exploreGetTimes = 16;
 
-            //当前所在地图的植物产出概率,plantRate需要扣除产出减益
-            int plantRate = landService.getLandPlantRate().get(animal.getCurrentLand()) -
+            //当前所在地图的植物产出概率,plantRate需要扣除产出减益,最少保留
+            int plantRate = Math.max(landService.getLandPlantRate().get(animal.getCurrentLand()) -
                     new BigDecimal(landService.getLandPlantCost(animal.getCurrentLand()))
-                            .divide(new BigDecimal(gameConfig.get("plantYieldDescPerCost")), BigDecimal.ROUND_DOWN).intValue();
+                            .divide(new BigDecimal(gameConfig.get("plantYieldDescPerCost")), BigDecimal.ROUND_DOWN).intValue(), Integer.parseInt(gameConfig.get("plantYieldLeast")));
             //计算可以获得的植物
             List<Plant> plants = Stream.iterate(0, n -> n + 1)
                     .map(n -> yieldPlant(plantRate) && discoverPlant(animal))
@@ -168,6 +168,10 @@ public class AnimalService {
         animal.setSatiety(Math.min(animal.getBaseSatiety(), animal.getSatiety() + plant.getSatietyAdd()));
         animal.setVigour(Math.min(100, animal.getVigour() + plant.getVigourAdd()));
         return new EatEnd(animal.getSatiety() - preSatiety, animal.getVigour() - preVigour);
+    }
+
+    public Integer getBagLoad(Animal animal) {
+        return animal.getBaseSatiety() / 10;
     }
 
     @Resource

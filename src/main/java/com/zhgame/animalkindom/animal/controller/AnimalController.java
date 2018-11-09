@@ -60,6 +60,12 @@ public class AnimalController {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.eatAtOnce(animal, plantName));
     }
 
+    @RequestMapping("/animal/getBagLoad/")
+    public NetMessage getBagLoad(HttpServletRequest request) throws Exception {
+        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getBagLoad(animal));
+    }
+
     @Resource
     AnimalService animalService;
     @Resource
