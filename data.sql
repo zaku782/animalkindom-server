@@ -48,12 +48,12 @@ CREATE TABLE `animal` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping finds for table `animal`
+-- Dumping data for table `animal`
 --
 
 LOCK TABLES `animal` WRITE;
 /*!40000 ALTER TABLE `animal` DISABLE KEYS */;
-INSERT INTO `animal` VALUES (1,'tiger',500,500,25,250,70,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',21,1541131217551);
+INSERT INTO `animal` VALUES (1,'tiger',500,500,218,250,55,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',6,1541552620869);
 /*!40000 ALTER TABLE `animal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,7 +79,7 @@ CREATE TABLE `animal_data` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping finds for table `animal_data`
+-- Dumping data for table `animal_data`
 --
 
 LOCK TABLES `animal_data` WRITE;
@@ -101,43 +101,17 @@ CREATE TABLE `config` (
   `value` varchar(45) DEFAULT NULL,
   `desc` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping finds for table `config`
+-- Dumping data for table `config`
 --
 
 LOCK TABLES `config` WRITE;
 /*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (1,'maxMapNumber','4000','地图列表大小'),(3,'mapMoveInterval','10','地图之间移动时间间隔,单位秒'),(4,'moveSatietyCost','0.3','地图之间移动消耗的饱食度百分比'),(5,'moveVigourCost','30','地图之间移动消耗精力'),(6,'sleepVigourRecoverInterval','300','睡眠时精力恢复的最小时间单位,单位秒'),(7,'sleepVigourRecover','1','睡眠时每时间单位恢复精力'),(8,'sleepSatietyCost','0.001','睡眠时每时间单位饱食度消耗百分比');
+INSERT INTO `config` VALUES (1,'maxLandNumber','4000','大陆列表大小'),(3,'landMoveInterval','10','大陆之间移动时间间隔,单位秒'),(4,'moveSatietyCost','0.3','大陆之间移动消耗的饱食度百分比'),(5,'moveVigourCost','30','大陆之间移动消耗精力'),(6,'sleepVigourRecoverInterval','300','睡眠时精力恢复的最小时间单位,单位秒'),(7,'sleepVigourRecover','1','睡眠时每时间单位恢复精力'),(8,'sleepSatietyCost','0.001','睡眠时每时间单位饱食度消耗百分比'),(9,'exploreInterval','300','最小探索时间,单位秒'),(10,'plantYieldDescPerCost','10','植物消耗多少后产出率递减1'),(11,'plantYieldRecoverCycle','2592000','植物产出率恢复周期,单位秒'),(12,'plantYieldLeast','5','植物最少产出率');
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `food`
---
-
-DROP TABLE IF EXISTS `food`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
-CREATE TABLE `food` (
-  `id` int(11) NOT NULL,
-  `name` varchar(45) DEFAULT NULL,
-  `satietyAdding` int(11) DEFAULT NULL,
-  `discoverer` int(11) DEFAULT NULL,
-  `discoverTime` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping finds for table `food`
---
-
-LOCK TABLES `food` WRITE;
-/*!40000 ALTER TABLE `food` DISABLE KEYS */;
-/*!40000 ALTER TABLE `food` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -150,18 +124,46 @@ DROP TABLE IF EXISTS `land`;
 CREATE TABLE `land` (
   `id` int(11) NOT NULL,
   `name` varchar(45) DEFAULT NULL,
+  `plantRate` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping finds for table `land`
+-- Dumping data for table `land`
 --
 
 LOCK TABLES `land` WRITE;
 /*!40000 ALTER TABLE `land` DISABLE KEYS */;
-INSERT INTO `land` VALUES (0,'新生之地'),(1,'萤火森林'),(2,'刀锋山'),(5,'暴风沙漠'),(6,'黄金草原'),(7,'魔法森林'),(11,'哭泣海岸'),(13,'银松森林'),(14,'十字路口'),(19,'贫瘠之地'),(21,'灰谷'),(22,'千针石林'),(23,'瘟疫之地'),(46,'尘泥沼泽');
+INSERT INTO `land` VALUES (0,'新生之地',10),(1,'萤火森林',10),(2,'刀锋山',10),(5,'暴风沙漠',0),(6,'黄金草原',40),(7,'魔法森林',30),(11,'哭泣海岸',10),(13,'银松森林',10),(14,'十字路口',10),(19,'贫瘠之地',10),(21,'灰谷',10),(22,'千针石林',10),(23,'瘟疫之地',10),(46,'尘泥沼泽',10);
 /*!40000 ALTER TABLE `land` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `plant`
+--
+
+DROP TABLE IF EXISTS `plant`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `plant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  `satietyAdd` int(11) DEFAULT NULL,
+  `vigourAdd` int(11) DEFAULT NULL,
+  `weight` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `plant`
+--
+
+LOCK TABLES `plant` WRITE;
+/*!40000 ALTER TABLE `plant` DISABLE KEYS */;
+INSERT INTO `plant` VALUES (1,'corn',2,2,NULL),(2,'tomato',2,1,NULL),(3,'pinecone',1,0,NULL),(4,'watermelon',3,1,NULL),(5,'banana',2,1,NULL);
+/*!40000 ALTER TABLE `plant` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -181,7 +183,7 @@ CREATE TABLE `user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping finds for table `user`
+-- Dumping data for table `user`
 --
 
 LOCK TABLES `user` WRITE;
@@ -199,4 +201,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-02 13:40:25
+-- Dump completed on 2018-11-09 14:56:01
