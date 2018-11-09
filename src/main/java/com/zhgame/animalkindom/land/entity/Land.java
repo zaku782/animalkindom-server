@@ -1,17 +1,19 @@
-package com.zhgame.animalkindom.map.entity;
+package com.zhgame.animalkindom.land.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "map")
-public class Map {
+@Table(name = "land")
+public class Land {
 
     @Id
     private Integer id;
 
     private String name;
+
+    private Integer plantRate;
 
     public Integer getId() {
         return id;
@@ -27,5 +29,13 @@ public class Map {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getPlantRate() {
+        return plantRate;
+    }
+
+    public void setPlantRate(Integer plantRate) {
+        this.plantRate = plantRate;
     }
 }

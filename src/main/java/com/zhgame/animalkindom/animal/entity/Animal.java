@@ -33,8 +33,8 @@ public class Animal {
     private Integer maxGrowLevel;
     private Long sleepTime;
     private Long exploreTime;
-    private Integer currentPos;
-    private byte[] mapDiscovered;
+    private Integer currentLand;
+    private byte[] landDiscovered;
     private Long moveTime;
 
     @Transient
@@ -58,8 +58,8 @@ public class Animal {
         this.typeId = animalData.getId();
         this.growLevel = 1;
         this.maxGrowLevel = animalData.getMaxGrowLevel();
-        this.currentPos = 0;
-        BitArray mapDiscovered = new BitArray(Integer.parseInt(gameConfig.get("maxMapNumber")));
+        this.currentLand = 0;
+        BitArray mapDiscovered = new BitArray(Integer.parseInt(gameConfig.get("maxLandNumber")));
         mapDiscovered.set(0, true);
         mapDiscovered.set(1, true);
         mapDiscovered.set(2, true);
@@ -74,7 +74,7 @@ public class Animal {
         mapDiscovered.set(22, true);
         mapDiscovered.set(23, true);
         mapDiscovered.set(46, true);
-        this.mapDiscovered = mapDiscovered.getBits();
+        this.landDiscovered = mapDiscovered.getBits();
     }
 
     private Integer convert(float multi, Integer value) {
@@ -233,20 +233,20 @@ public class Animal {
         this.exploreTime = exploreTime;
     }
 
-    public Integer getCurrentPos() {
-        return currentPos;
+    public Integer getCurrentLand() {
+        return currentLand;
     }
 
-    public void setCurrentPos(Integer currentPos) {
-        this.currentPos = currentPos;
+    public void setCurrentLand(Integer currentLand) {
+        this.currentLand = currentLand;
     }
 
-    public byte[] getMapDiscovered() {
-        return mapDiscovered;
+    public byte[] getLandDiscovered() {
+        return landDiscovered;
     }
 
-    public void setMapDiscovered(byte[] mapDiscovered) {
-        this.mapDiscovered = mapDiscovered;
+    public void setLandDiscovered(byte[] landDiscovered) {
+        this.landDiscovered = landDiscovered;
     }
 
     public Long getMoveTime() {

@@ -13,7 +13,6 @@ public class Account {
     private String name;
     private String password;
     private String salt;
-    private String token;
 
     public Account() {
 
@@ -30,14 +29,6 @@ public class Account {
 
     public void setSalt(String salt) {
         this.salt = salt;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public Long getId() {

@@ -1,4 +1,4 @@
-package com.zhgame.animalkindom.map.entity;
+package com.zhgame.animalkindom.land.entity;
 
 public class MoveEnd {
     private String vigourCost;

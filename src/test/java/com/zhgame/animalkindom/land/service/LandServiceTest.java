@@ -1,8 +1,8 @@
-package com.zhgame.animalkindom.map.service;
+package com.zhgame.animalkindom.land.service;
 
 import org.junit.Test;
 
-public class MapServiceTest {
+public class LandServiceTest {
     @Test
     public void count2Loop() throws Exception {
         //MapService service  = new MapService();

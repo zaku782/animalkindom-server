@@ -1,57 +1,89 @@
-package com.zhgame.animalkindom.map.service;
+package com.zhgame.animalkindom.land.service;
 
 import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.service.AnimalRepository;
-import com.zhgame.animalkindom.map.entity.Map;
-import com.zhgame.animalkindom.map.entity.MoveEnd;
+import com.zhgame.animalkindom.land.entity.Land;
+import com.zhgame.animalkindom.land.entity.MoveEnd;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.DateTool;
 import com.zhgame.animalkindom.tools.NetMessage;
+import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 @Component
-public class MapService {
+public class LandService {
 
-    private static List<Map> mapData;
+    private List<Land> landData;
+    private Map<Integer, Integer> landPlantRate;
 
-    public List<Map> getMapData() {
-        if (mapData == null) {
-            mapData = mapRepository.findAll();
+    public synchronized List<Land> getLandData() {
+        if (landData == null) {
+            landData = landRepository.findAll();
         }
-        return mapData;
+        return landData;
     }
 
-    public List<Map> getMaps(Animal animal) {
-        Integer currentMap = animal.getCurrentPos();
-        byte[] mapDiscovered = animal.getMapDiscovered();
-        BitArray bitArray = new BitArray(mapDiscovered);
-        List<Integer> mapDiscoveredIds = new ArrayList<>();
+    public synchronized Map<Integer, Integer> getLandPlantRate() {
+        if (landPlantRate == null) {
+            landPlantRate = new HashMap<>();
+            getLandData().forEach(land -> landPlantRate.put(land.getId(), land.getPlantRate()));
+        }
+        return landPlantRate;
+    }
+
+    /**
+     * 累计大陆植物资源消耗
+     *
+     * @param landId
+     */
+    public synchronized void landPlantCost(Integer landId) {
+        String key = "land_" + landId + "_plant_cost";
+        Integer plantCost = (Integer) redisTool.get(key);
+        if (plantCost == null) {
+            redisTool.set(key, 0, Long.parseLong(gameConfig.get("plantYieldRecoverCycle")));
+        } else {
+            redisTool.increment(key, 1);
+        }
+    }
+
+    public Integer getLandPlantCost(Integer landId) {
+        Object cost = redisTool.get("land_" + landId + "_plant_cost");
+        if (cost != null) {
+            return Integer.parseInt(cost.toString());
+        } else {
+            return 0;
+        }
+    }
+
+    public List<Land> getLands(Animal animal) {
+        Integer currentLand = animal.getCurrentLand();
+        byte[] landDiscovered = animal.getLandDiscovered();
+        BitArray bitArray = new BitArray(landDiscovered);
+        List<Integer> landDiscoveredIds = new ArrayList<>();
         bitArray.forEach((id, discovered) -> {
             if (discovered) {
-                mapDiscoveredIds.add(id);
+                landDiscoveredIds.add(id);
             }
         });
-        List<Map> mapData = getMapData();
-        List<Map> mapDiscoveredList = mapData.stream().filter(map -> mapDiscoveredIds.contains(map.getId())).collect(toList());
-        mapDiscoveredList.add(0, mapData.stream().filter(map -> map.getId().intValue() == currentMap.intValue()).findFirst().get());
-        return mapDiscoveredList;
+        List<Land> landData = getLandData();
+        List<Land> landDiscoveredList = landData.stream().filter(land -> landDiscoveredIds.contains(land.getId())).collect(toList());
+        landDiscoveredList.add(0, landData.stream().filter(land -> land.getId().intValue() == currentLand.intValue()).findFirst().get());
+        return landDiscoveredList;
     }
 
-    public NetMessage enter(Animal animal, int mapId) {
+    public NetMessage enter(Animal animal, int landId) {
         //check move
-        int[] round = round(animal.getCurrentPos());
-        byte[] mapDiscovered = animal.getMapDiscovered();
-        BitArray bitArray = new BitArray(mapDiscovered);
-        if (Arrays.stream(round).anyMatch(i -> i == mapId) && bitArray.get(mapId)) {
+        int[] round = round(animal.getCurrentLand());
+        byte[] landDiscovered = animal.getLandDiscovered();
+        BitArray bitArray = new BitArray(landDiscovered);
+        if (Arrays.stream(round).anyMatch(i -> i == landId) && bitArray.get(landId)) {
 
             long last = animal.getMoveTime();
             long now = DateTool.getNowMillis();
@@ -60,8 +92,8 @@ public class MapService {
             String satietyCost = gameConfig.get("moveSatietyCost");
             String vigourCost = gameConfig.get("moveVigourCost");
 
-            if (new BigDecimal(between).divide(new BigDecimal(1000), BigDecimal.ROUND_HALF_UP).intValue() < Integer.parseInt(gameConfig.get("mapMoveInterval"))) {
-                return new NetMessage(NetMessage.MAP_MOVE_WAIT, NetMessage.WARNING);
+            if (new BigDecimal(between).divide(new BigDecimal(1000), BigDecimal.ROUND_HALF_UP).intValue() < Integer.parseInt(gameConfig.get("landMoveInterval"))) {
+                return new NetMessage(NetMessage.LAND_MOVE_WAIT, NetMessage.WARNING);
             }
 
             Integer needSatiety = new BigDecimal(satietyCost).multiply(new BigDecimal(animal.getBaseSatiety())).intValue();
@@ -74,7 +106,7 @@ public class MapService {
             }
             animal.setSatiety(animal.getSatiety() - needSatiety);
             animal.setVigour(animal.getVigour() - Integer.parseInt(vigourCost));
-            animal.setCurrentPos(mapId);
+            animal.setCurrentLand(landId);
             animal.setMoveTime(now);
             animalRepository.save(animal);
             return new NetMessage("", NetMessage.SUCCESS, new MoveEnd(vigourCost, needSatiety.toString()));
@@ -180,12 +212,14 @@ public class MapService {
                 return new int[]{};
         }
     }
-    //cal map numbers round the given map number-------end------------------------
+    //cal land numbers round the given land number-------end------------------------
 
     @Resource
-    private MapRepository mapRepository;
+    private LandRepository landRepository;
     @Resource
     private AnimalRepository animalRepository;
     @Resource
-    private java.util.Map<String, String> gameConfig;
+    private Map<String, String> gameConfig;
+    @Resource
+    private RedisTool redisTool;
 }

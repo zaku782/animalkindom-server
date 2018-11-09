@@ -40,20 +40,20 @@ CREATE TABLE `animal` (
   `maxGrowLevel` int(11) DEFAULT NULL,
   `sleepTime` bigint(13) DEFAULT NULL,
   `exploreTime` bigint(13) DEFAULT NULL,
-  `mapDiscovered` varbinary(1000) DEFAULT NULL,
-  `currentPos` int(11) DEFAULT NULL,
+  `landDiscovered` varbinary(1000) DEFAULT NULL,
+  `currentLand` int(11) DEFAULT NULL,
   `moveTime` bigint(13) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `animal`
+-- Dumping finds for table `animal`
 --
 
 LOCK TABLES `animal` WRITE;
 /*!40000 ALTER TABLE `animal` DISABLE KEYS */;
-INSERT INTO `animal` VALUES (1,'tiger',500,500,25,250,70,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',21,1541131217551);
+INSERT INTO `animal` VALUES (1,'tiger',500,500,25,250,70,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',21,1541131217551);
 /*!40000 ALTER TABLE `animal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,7 +79,7 @@ CREATE TABLE `animal_data` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `animal_data`
+-- Dumping finds for table `animal_data`
 --
 
 LOCK TABLES `animal_data` WRITE;
@@ -105,7 +105,7 @@ CREATE TABLE `config` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `config`
+-- Dumping finds for table `config`
 --
 
 LOCK TABLES `config` WRITE;
@@ -132,7 +132,7 @@ CREATE TABLE `food` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `food`
+-- Dumping finds for table `food`
 --
 
 LOCK TABLES `food` WRITE;
@@ -141,13 +141,13 @@ LOCK TABLES `food` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `map`
+-- Table structure for table `land`
 --
 
-DROP TABLE IF EXISTS `map`;
+DROP TABLE IF EXISTS `land`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `map` (
+CREATE TABLE `land` (
   `id` int(11) NOT NULL,
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -155,13 +155,13 @@ CREATE TABLE `map` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `map`
+-- Dumping finds for table `land`
 --
 
-LOCK TABLES `map` WRITE;
-/*!40000 ALTER TABLE `map` DISABLE KEYS */;
-INSERT INTO `map` VALUES (0,'新生之地'),(1,'萤火森林'),(2,'刀锋山'),(5,'暴风沙漠'),(6,'黄金草原'),(7,'魔法森林'),(11,'哭泣海岸'),(13,'银松森林'),(14,'十字路口'),(19,'贫瘠之地'),(21,'灰谷'),(22,'千针石林'),(23,'瘟疫之地'),(46,'尘泥沼泽');
-/*!40000 ALTER TABLE `map` ENABLE KEYS */;
+LOCK TABLES `land` WRITE;
+/*!40000 ALTER TABLE `land` DISABLE KEYS */;
+INSERT INTO `land` VALUES (0,'新生之地'),(1,'萤火森林'),(2,'刀锋山'),(5,'暴风沙漠'),(6,'黄金草原'),(7,'魔法森林'),(11,'哭泣海岸'),(13,'银松森林'),(14,'十字路口'),(19,'贫瘠之地'),(21,'灰谷'),(22,'千针石林'),(23,'瘟疫之地'),(46,'尘泥沼泽');
+/*!40000 ALTER TABLE `land` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -181,7 +181,7 @@ CREATE TABLE `user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user`
+-- Dumping finds for table `user`
 --
 
 LOCK TABLES `user` WRITE;
