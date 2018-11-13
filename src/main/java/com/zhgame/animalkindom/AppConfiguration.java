@@ -31,19 +31,6 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
         super.addViewControllers(registry);
     }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        //.allowedOrigins("http://www.animalkindom.win")
-                        .allowedOrigins("http://localhost:8888")
-                        .allowCredentials(true);
-            }
-        };
-    }
-
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new HandlerInterceptorAdapter() {
             @Override
@@ -56,7 +43,7 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                         "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
                 response.setHeader("Access-Control-Allow-Credentials", "true");
                 //response.setHeader("Access-Control-Allow-Origin", "http://www.animalkindom.win");
-                response.setHeader("Access-Control-Allow-Origin", "http://localhost:8888");
+                response.setHeader("Access-Control-Allow-Origin", request.getHeader("origin"));
                 if (request.getRequestURL().indexOf("/signIn/") == -1
                         && request.getRequestURL().indexOf("/signOut/") == -1
                         && request.getRequestURL().indexOf("/signUp/") == -1) {
@@ -91,6 +78,7 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
     public Map<String, String> gameConfig() {
+        System.out.println("********************************************************");
         return gameConfigService.getGameConfig();
     }
 

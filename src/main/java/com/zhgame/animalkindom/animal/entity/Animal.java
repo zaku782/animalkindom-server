@@ -3,7 +3,6 @@ package com.zhgame.animalkindom.animal.entity;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.CalculateTool;
 
-import javax.annotation.Resource;
 import javax.persistence.*;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class Animal {
 
     }
 
-    public Animal(AnimalData animalData) {
+    public Animal(AnimalData animalData, Map<String, String> gameConfig) {
         this.name = animalData.getName();
         this.health = animalData.getBaseHealth();
         this.baseHealth = animalData.getBaseHealth();
@@ -64,16 +63,6 @@ public class Animal {
         mapDiscovered.set(1, true);
         mapDiscovered.set(2, true);
         mapDiscovered.set(5, true);
-        mapDiscovered.set(6, true);
-        mapDiscovered.set(7, true);
-        mapDiscovered.set(11, true);
-        mapDiscovered.set(13, true);
-        mapDiscovered.set(14, true);
-        mapDiscovered.set(19, true);
-        mapDiscovered.set(21, true);
-        mapDiscovered.set(22, true);
-        mapDiscovered.set(23, true);
-        mapDiscovered.set(46, true);
         this.landDiscovered = mapDiscovered.getBits();
     }
 
@@ -256,8 +245,4 @@ public class Animal {
     public void setMoveTime(Long moveTime) {
         this.moveTime = moveTime;
     }
-
-    @Transient
-    @Resource
-    private Map<String, String> gameConfig;
 }

@@ -15,6 +15,7 @@ public class NetMessage {
     public static String LAND_MOVE_WAIT = "land_move_wait";
     public static String NOT_ENOUGH_SATIETY = "not_enough_satiety";
     public static String NOT_ENOUGH_VIGOUR = "not_enough_vigour";
+    public static String BAG_FULL = "bag_full";
 
     private String type;
     private String content;

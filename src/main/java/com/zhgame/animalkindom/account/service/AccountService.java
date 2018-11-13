@@ -140,8 +140,12 @@ public class AccountService {
         redisTool.set(token, accountSession, CookieTool.COOKIE_TIME);
     }
 
-    private void clearAccount(HttpServletRequest request, HttpServletResponse response) {
-        CookieTool.cleanCookies(response, "ak_cookie");
+    private void clearAccount(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Optional<String> cookie = CookieTool.getCookies(request, "ak_token");
+        if (cookie.isPresent()) {
+            redisTool.del(cookie.get());
+            CookieTool.cleanCookies(response, "ak_token");
+        }
         request.getSession().setAttribute("login_account", null);
     }
 

@@ -1,15 +1,13 @@
 package com.zhgame.animalkindom.animal.service;
 
 import com.zhgame.animalkindom.account.entity.Account;
-import com.zhgame.animalkindom.animal.entity.Animal;
-import com.zhgame.animalkindom.animal.entity.AnimalData;
-import com.zhgame.animalkindom.animal.entity.EatEnd;
-import com.zhgame.animalkindom.animal.entity.SleepEnd;
+import com.zhgame.animalkindom.animal.entity.*;
 import com.zhgame.animalkindom.land.service.LandService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
 import com.zhgame.animalkindom.plant.entity.Plant;
 import com.zhgame.animalkindom.plant.service.PlantService;
 import com.zhgame.animalkindom.tools.DateTool;
+import com.zhgame.animalkindom.tools.NetMessage;
 import com.zhgame.animalkindom.tools.RandomTool;
 import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
@@ -18,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.zhgame.animalkindom.tools.NetMessage.*;
 
 @Component
 public class AnimalService {
@@ -27,7 +28,7 @@ public class AnimalService {
     public Animal createAnimal(Account account) {
         List<AnimalData> animalData = animalDataService.getAllAnimalData();
         AnimalData animalType = animalData.get(new Random().nextInt(animalData.size()));
-        Animal a = new Animal(animalType);
+        Animal a = new Animal(animalType, gameConfig);
         a.setAccountId(account.getId());
         return a;
     }
@@ -92,8 +93,7 @@ public class AnimalService {
                     .divide(new BigDecimal(gameConfig.get("exploreInterval")), 3, BigDecimal.ROUND_HALF_UP)
                     .intValue();
 
-            //Test
-            exploreGetTimes = 16;
+            exploreGetTimes = 20;
 
             //当前所在地图的植物产出概率,plantRate需要扣除产出减益,最少保留
             int plantRate = Math.max(landService.getLandPlantRate().get(animal.getCurrentLand()) -
@@ -113,6 +113,9 @@ public class AnimalService {
             exploreEnd.setFinds(finds);
             //redis记录探索到的资源,保存一段时间,同时用于拾取资源时服务器验证,移动到别的大陆时删除这些资源
             redisTool.set("explore_" + animal.getId(), finds);
+
+
+            //发现地图
         } else {
             animal.setExploreTime(DateTool.getNowMillis());
         }
@@ -139,39 +142,91 @@ public class AnimalService {
         return RandomTool.happen(animal.getIntelligence(), 100);
     }
 
-    @SuppressWarnings("unchecked")
     @Transactional
     public EatEnd eatAtOnce(Animal animal, String plantName) {
-        EatEnd eatEnd = new EatEnd(0, 0);
+        final EatEnd eatEnd = new EatEnd(0, 0);
+        findPlantFromRedisAndOperate(animal, plantName, (Plant plant) -> {
+            Map<String, Integer> eatRecover = eat(animal, plant);
+            eatEnd.setSatietyAdd(eatRecover.get("satiety"));
+            eatEnd.setVigourAdd(eatRecover.get("vigour"));
+            animalRepository.save(animal);
+            return Optional.empty();
+        });
+        return eatEnd;
+    }
+
+    @Transactional
+    public EatEnd eatFromBag(Animal animal, Long itemId) {
+        final EatEnd eatEnd = new EatEnd(0, 0);
+        BagItem bagItem = bagItemRepository.getOne(itemId);
+        if (bagItem != null) {
+            Map<String, Integer> eatRecover = eat(animal, bagItem);
+            eatEnd.setSatietyAdd(eatRecover.get("satiety"));
+            eatEnd.setVigourAdd(eatRecover.get("vigour"));
+            animalRepository.save(animal);
+            bagItemRepository.delete(itemId);
+        }
+        return eatEnd;
+    }
+
+    public Map<String, Integer> eat(Animal animal, Eatable eatable) {
+        Integer preSatiety = animal.getSatiety();
+        Integer preVigour = animal.getVigour();
+        animal.setSatiety(Math.min(animal.getBaseSatiety(), animal.getSatiety() + eatable.getSatietyAdd()));
+        animal.setVigour(Math.min(100, animal.getVigour() + eatable.getVigourAdd()));
+        Map<String, Integer> eatRecover = new HashMap<>();
+        eatRecover.put("satiety", animal.getSatiety() - preSatiety);
+        eatRecover.put("vigour", animal.getVigour() - preVigour);
+        return eatRecover;
+    }
+
+    public Integer getBagLoad(Animal animal) {
+        return animal.getBaseSatiety() / 10;
+    }
+
+    public NetMessage collectPlant(Animal animal, String plantName) {
+        return findPlantFromRedisAndOperate(animal, plantName, (Plant plant) -> {
+            Integer maxLoad = getBagLoad(animal);
+            List<BagItem> items = bagItemRepository.getByAnimalId(animal.getId());
+            if (items.stream().mapToInt(BagItem::getWeight).sum() + plant.getWeight() > maxLoad) {
+                return Optional.of(BAG_FULL);
+            }
+
+            BagItem bagItem = new BagItem();
+            bagItem.setAnimalId(animal.getId());
+            bagItem.setName(plant.getName());
+            bagItem.setSatietyAdd(plant.getSatietyAdd());
+            bagItem.setVigourAdd(plant.getVigourAdd());
+            bagItem.setWeight(plant.getWeight());
+            bagItemRepository.save(bagItem);
+
+            return Optional.empty();
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private NetMessage findPlantFromRedisAndOperate(Animal animal, String plantName, Function<Plant, Optional<String>> f) {
         Map<String, List> finds = getFinds(animal);
         Object plant = finds.get("plant");
         if (plant != null) {
             List<Plant> plants = (List<Plant>) plant;
-            Optional<Plant> toEat = plants.stream().filter(p -> p.getName().equals(plantName)).findFirst();
-            if (toEat.isPresent()) {
-                eatEnd = eat(animal, toEat.get());
-                //更新属性
-                animalRepository.save(animal);
-                plants.remove(toEat.get());
-                //更新已探索资源
+            Optional<Plant> toOperate = plants.stream().filter(p -> p.getName().equals(plantName)).findFirst();
+            if (toOperate.isPresent()) {
+                Optional<String> msg = f.apply(toOperate.get());
+                if (msg.isPresent()) {
+                    return new NetMessage(msg.get(), DANGER);
+                }
+                plants.remove(toOperate.get());
                 redisTool.set("explore_" + animal.getId(), finds);
                 //当前区域资源消耗计算
                 landService.landPlantCost(animal.getCurrentLand());
             }
         }
-        return eatEnd;
+        return new NetMessage(STATUS_OK, SUCCESS);
     }
 
-    public EatEnd eat(Animal animal, Plant plant) {
-        Integer preSatiety = animal.getSatiety();
-        Integer preVigour = animal.getVigour();
-        animal.setSatiety(Math.min(animal.getBaseSatiety(), animal.getSatiety() + plant.getSatietyAdd()));
-        animal.setVigour(Math.min(100, animal.getVigour() + plant.getVigourAdd()));
-        return new EatEnd(animal.getSatiety() - preSatiety, animal.getVigour() - preVigour);
-    }
-
-    public Integer getBagLoad(Animal animal) {
-        return animal.getBaseSatiety() / 10;
+    public List<BagItem> getBagItems(Animal animal) {
+        return bagItemRepository.getByAnimalId(animal.getId());
     }
 
     @Resource
@@ -186,4 +241,6 @@ public class AnimalService {
     private PlantService plantService;
     @Resource
     private RedisTool redisTool;
+    @Resource
+    private BagItemRepository bagItemRepository;
 }

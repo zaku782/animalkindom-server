@@ -44,7 +44,7 @@ CREATE TABLE `animal` (
   `currentLand` int(11) DEFAULT NULL,
   `moveTime` bigint(13) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,7 +53,7 @@ CREATE TABLE `animal` (
 
 LOCK TABLES `animal` WRITE;
 /*!40000 ALTER TABLE `animal` DISABLE KEYS */;
-INSERT INTO `animal` VALUES (1,'tiger',500,500,218,250,55,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\çh\è\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',6,1541552620869);
+INSERT INTO `animal` VALUES (1,'tiger',500,500,150,250,100,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\çh\è\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',5,1542095634785),(2,'tiger',500,500,250,250,100,100,50,80,70,12,2,1,40,NULL,NULL,_binary '\'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',0,NULL);
 /*!40000 ALTER TABLE `animal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,6 +86,34 @@ LOCK TABLES `animal_data` WRITE;
 /*!40000 ALTER TABLE `animal_data` DISABLE KEYS */;
 INSERT INTO `animal_data` VALUES (1,'lion',450,220,80,50,60,50,30),(2,'tiger',500,250,100,50,80,70,40);
 /*!40000 ALTER TABLE `animal_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bag_item`
+--
+
+DROP TABLE IF EXISTS `bag_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bag_item` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  `satietyAdd` int(11) DEFAULT NULL,
+  `vigourAdd` int(11) DEFAULT NULL,
+  `weight` int(11) DEFAULT NULL,
+  `animalId` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bag_item`
+--
+
+LOCK TABLES `bag_item` WRITE;
+/*!40000 ALTER TABLE `bag_item` DISABLE KEYS */;
+INSERT INTO `bag_item` VALUES (1,'banana',2,1,3,1),(2,'watermelon',3,1,5,1),(3,'corn',2,2,3,1),(4,'pinecone',1,0,1,1),(5,'banana',2,1,3,1),(8,'banana',2,1,3,1),(9,'tomato',2,1,2,2),(10,'watermelon',3,1,5,2),(11,'watermelon',3,1,5,2),(12,'tomato',2,1,2,2),(13,'tomato',2,1,2,2),(14,'tomato',2,1,2,2),(15,'tomato',2,1,2,2),(16,'tomato',2,1,2,2),(17,'tomato',2,1,2,2),(18,'pinecone',1,0,1,2);
+/*!40000 ALTER TABLE `bag_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -162,7 +190,7 @@ CREATE TABLE `plant` (
 
 LOCK TABLES `plant` WRITE;
 /*!40000 ALTER TABLE `plant` DISABLE KEYS */;
-INSERT INTO `plant` VALUES (1,'corn',2,2,NULL),(2,'tomato',2,1,NULL),(3,'pinecone',1,0,NULL),(4,'watermelon',3,1,NULL),(5,'banana',2,1,NULL);
+INSERT INTO `plant` VALUES (1,'corn',2,2,3),(2,'tomato',2,1,2),(3,'pinecone',1,0,1),(4,'watermelon',3,1,5),(5,'banana',2,1,3);
 /*!40000 ALTER TABLE `plant` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +207,7 @@ CREATE TABLE `user` (
   `password` varchar(64) DEFAULT NULL,
   `salt` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,7 +216,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'test','2f01b8630cbd2bf759449add35edf9524a7ad3058a4cac10a3659f8b29fd3952','80a43221fd9bd1beeb1e5094fd86173b60823c3e27adcad1b1e06144a6e683ee');
+INSERT INTO `user` VALUES (1,'test','2f01b8630cbd2bf759449add35edf9524a7ad3058a4cac10a3659f8b29fd3952','80a43221fd9bd1beeb1e5094fd86173b60823c3e27adcad1b1e06144a6e683ee'),(12,'å“ˆå•°','273fe37b044d131a277250110931211c3bbb9eff1902a80161c9fb21755612ff','25b1e8bdf9f7363dc15b84ce9f1fe1f071800845129c8a8a065b37e123ada4ba');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -201,4 +229,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-09 14:56:01
+-- Dump completed on 2018-11-13 16:12:27

@@ -60,14 +60,32 @@ public class AnimalController {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.eatAtOnce(animal, plantName));
     }
 
+    @RequestMapping("/animal/eatFromBag/{itemId}/")
+    public NetMessage eatFromBag(@PathVariable("itemId") Long itemId, HttpServletRequest request) throws Exception {
+        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.eatFromBag(animal, itemId));
+    }
+
     @RequestMapping("/animal/getBagLoad/")
     public NetMessage getBagLoad(HttpServletRequest request) throws Exception {
         Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getBagLoad(animal));
     }
 
+    @RequestMapping("/animal/collectPlant/{plantName}/")
+    public NetMessage collectPlant(@PathVariable("plantName") String plantName, HttpServletRequest request) throws Exception {
+        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
+        return animalService.collectPlant(animal, plantName);
+    }
+
+    @RequestMapping("/animal/getBagItems/")
+    public NetMessage getBagItems(HttpServletRequest request) throws Exception {
+        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getBagItems(animal));
+    }
+
     @Resource
-    AnimalService animalService;
+    private AnimalService animalService;
     @Resource
-    AccountService accountService;
+    private AccountService accountService;
 }
