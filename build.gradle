@@ -1,17 +1,10 @@
-buildscript {
-    ext {
-        springBootVersion = '1.5.2.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
+plugins {
+    id 'org.springframework.boot' version '2.1.0.RELEASE'
 }
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
@@ -27,9 +20,6 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-configuration-processor')
     compile('org.springframework.boot:spring-boot-starter-data-redis')
-    compile('org.springframework.data:spring-data-redis')
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    compile('com.google.code.gson:gson:2.3.1')
-    compile('com.fasterxml.jackson.core:jackson-databind:2.8.4')
     runtime('mysql:mysql-connector-java:8.0.12')
 }

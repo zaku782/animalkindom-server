@@ -1,11 +1,10 @@
 package com.zhgame.animalkindom.tools;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 
 public class DateTool {
 
-    public static Long getNowMillis(){
+    public static Long getNowMillis() {
         return System.currentTimeMillis();
     }
 

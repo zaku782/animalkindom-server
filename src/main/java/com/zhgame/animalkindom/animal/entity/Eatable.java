@@ -1,9 +1,10 @@
 package com.zhgame.animalkindom.animal.entity;
 
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 @MappedSuperclass
-public class Eatable {
+public class Eatable implements Serializable {
     private String name;
     private Integer satietyAdd;
     private Integer vigourAdd;

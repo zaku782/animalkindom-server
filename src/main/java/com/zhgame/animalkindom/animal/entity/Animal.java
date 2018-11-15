@@ -2,6 +2,7 @@ package com.zhgame.animalkindom.animal.entity;
 
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.CalculateTool;
+import com.zhgame.animalkindom.tools.DateTool;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -28,13 +29,17 @@ public class Animal {
     private Integer speed;
     private Long accountId;
     private Long typeId;
+    private Integer growDay;
     private Integer growLevel;
-    private Integer maxGrowLevel;
     private Long sleepTime;
     private Long exploreTime;
     private Integer currentLand;
     private byte[] landDiscovered;
     private Long moveTime;
+    private Long metempsychosisTime;
+
+    @Transient
+    private Integer days;
 
     @Transient
     private String accountName;
@@ -55,9 +60,10 @@ public class Animal {
         this.agile = animalData.getBaseAgile();
         this.speed = animalData.getBaseSpeed();
         this.typeId = animalData.getId();
-        this.growLevel = 1;
-        this.maxGrowLevel = animalData.getMaxGrowLevel();
+        this.growDay = animalData.getGrowDay();
+        this.growLevel = animalData.getGrowLevel();
         this.currentLand = 0;
+        this.metempsychosisTime = DateTool.getNowMillis();
         BitArray mapDiscovered = new BitArray(Integer.parseInt(gameConfig.get("maxLandNumber")));
         mapDiscovered.set(0, true);
         mapDiscovered.set(1, true);
@@ -102,12 +108,12 @@ public class Animal {
         this.growLevel = growLevel;
     }
 
-    public Integer getMaxGrowLevel() {
-        return maxGrowLevel;
+    public Integer getGrowDay() {
+        return growDay;
     }
 
-    public void setMaxGrowLevel(Integer maxGrowLevel) {
-        this.maxGrowLevel = maxGrowLevel;
+    public void setGrowDay(Integer growDay) {
+        this.growDay = growDay;
     }
 
     public Integer getHealth() {
@@ -244,5 +250,21 @@ public class Animal {
 
     public void setMoveTime(Long moveTime) {
         this.moveTime = moveTime;
+    }
+
+    public Long getMetempsychosisTime() {
+        return metempsychosisTime;
+    }
+
+    public void setMetempsychosisTime(Long metempsychosisTime) {
+        this.metempsychosisTime = metempsychosisTime;
+    }
+
+    public Integer getDays() {
+        return days;
+    }
+
+    public void setDays(Integer days) {
+        this.days = days;
     }
 }

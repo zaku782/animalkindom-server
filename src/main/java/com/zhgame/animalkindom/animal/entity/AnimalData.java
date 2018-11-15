@@ -1,10 +1,11 @@
 package com.zhgame.animalkindom.animal.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "animal_data")
-public class AnimalData {
+public class AnimalData implements Serializable {
 
     @Id
     private Long id;
@@ -16,7 +17,9 @@ public class AnimalData {
     private Integer baseIntelligence;
     private Integer baseAgile;
     private Integer baseSpeed;
-    private Integer maxGrowLevel;
+    private Integer growDay;
+    private Integer growLevel;
+    private Integer level;
 
     public Long getId() {
         return id;
@@ -74,19 +77,35 @@ public class AnimalData {
         this.baseSpeed = baseSpeed;
     }
 
-    public Integer getMaxGrowLevel() {
-        return maxGrowLevel;
-    }
-
-    public void setMaxGrowLevel(Integer maxGrowLevel) {
-        this.maxGrowLevel = maxGrowLevel;
-    }
-
     public Integer getBaseSatiety() {
         return baseSatiety;
     }
 
     public void setBaseSatiety(Integer baseSatiety) {
         this.baseSatiety = baseSatiety;
+    }
+
+    public Integer getGrowDay() {
+        return growDay;
+    }
+
+    public void setGrowDay(Integer growDay) {
+        this.growDay = growDay;
+    }
+
+    public Integer getGrowLevel() {
+        return growLevel;
+    }
+
+    public void setGrowLevel(Integer growLevel) {
+        this.growLevel = growLevel;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }

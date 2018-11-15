@@ -4,63 +4,24 @@ import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.service.AnimalRepository;
 import com.zhgame.animalkindom.land.entity.Land;
 import com.zhgame.animalkindom.land.entity.MoveEnd;
+import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.DateTool;
 import com.zhgame.animalkindom.tools.NetMessage;
-import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 @Component
 public class LandService {
-
-    private List<Land> landData;
-    private Map<Integer, Integer> landPlantRate;
-
-    public synchronized List<Land> getLandData() {
-        if (landData == null) {
-            landData = landRepository.findAll();
-        }
-        return landData;
-    }
-
-    public synchronized Map<Integer, Integer> getLandPlantRate() {
-        if (landPlantRate == null) {
-            landPlantRate = new HashMap<>();
-            getLandData().forEach(land -> landPlantRate.put(land.getId(), land.getPlantRate()));
-        }
-        return landPlantRate;
-    }
-
-    /**
-     * 累计大陆植物资源消耗
-     *
-     * @param landId
-     */
-    public synchronized void landPlantCost(Integer landId) {
-        String key = "land_" + landId + "_plant_cost";
-        Integer plantCost = (Integer) redisTool.get(key);
-        if (plantCost == null) {
-            redisTool.set(key, 0, Long.parseLong(gameConfig.get("plantYieldRecoverCycle")));
-        } else {
-            redisTool.increment(key, 1);
-        }
-    }
-
-    public Integer getLandPlantCost(Integer landId) {
-        Object cost = redisTool.get("land_" + landId + "_plant_cost");
-        if (cost != null) {
-            return Integer.parseInt(cost.toString());
-        } else {
-            return 0;
-        }
-    }
 
     public List<Land> getLands(Animal animal) {
         Integer currentLand = animal.getCurrentLand();
@@ -72,14 +33,35 @@ public class LandService {
                 landDiscoveredIds.add(id);
             }
         });
-        List<Land> landData = getLandData();
-        List<Land> landDiscoveredList = landData.stream().filter(land -> landDiscoveredIds.contains(land.getId())).collect(toList());
-        landDiscoveredList.add(0, landData.stream().filter(land -> land.getId().intValue() == currentLand.intValue()).findFirst().get());
+        List<Land> landData = redisService.getLandData();
+        //过滤出探索到的大陆
+        List<Land> landDiscoveredList = landData.stream().filter(
+                land -> landDiscoveredIds.contains(land.getId())).collect(toList()
+        );
+        //将当前所在大陆放置在列表第一个
+        landDiscoveredList.add(0, landData.stream().filter(
+                land -> land.getId().intValue() == currentLand.intValue()
+        ).findFirst().get());
+        //显示更新后的产出率
+        landDiscoveredList.forEach(land -> land.setPlantRate(getPlantRate(land)));
         return landDiscoveredList;
+    }
+
+    /**
+     * 植物真实产出率：原产出率-过多采集导致的产出率减益,最小为0
+     *
+     * @param land 大陆
+     * @return 植物真实产出率
+     */
+    public Integer getPlantRate(Land land) {
+        return Math.max(land.getPlantRate() -
+                new BigDecimal(redisService.getLandPlantCost(land.getId()))
+                        .divide(new BigDecimal(gameConfig.get("plantYieldDescPerCost")), BigDecimal.ROUND_DOWN).intValue(), 0);
     }
 
     public NetMessage enter(Animal animal, int landId) {
         //check move
+        Integer currentLand = animal.getCurrentLand();
         int[] round = round(animal.getCurrentLand());
         byte[] landDiscovered = animal.getLandDiscovered();
         BitArray bitArray = new BitArray(landDiscovered);
@@ -109,12 +91,19 @@ public class LandService {
             animal.setCurrentLand(landId);
             animal.setMoveTime(now);
             animalRepository.save(animal);
+
+            move(currentLand, landId, animal);
+
             return new NetMessage("", NetMessage.SUCCESS, new MoveEnd(vigourCost, needSatiety.toString()));
         } else {
             return new NetMessage(NetMessage.STATUS_INVALID_OPERATION, NetMessage.DANGER);
         }
     }
 
+    public void move(Integer leave, Integer moveTo, Animal animal) {
+        redisService.leaveLand(leave, animal);
+        redisService.moveToLand(moveTo, animal);
+    }
 
     private int loop2Count(int loop) {
         return (int) Math.pow(3 + 2 * (loop - 1), 2);
@@ -212,7 +201,6 @@ public class LandService {
                 return new int[]{};
         }
     }
-    //cal land numbers round the given land number-------end------------------------
 
     @Resource
     private LandRepository landRepository;
@@ -221,5 +209,5 @@ public class LandService {
     @Resource
     private Map<String, String> gameConfig;
     @Resource
-    private RedisTool redisTool;
+    private RedisService redisService;
 }

@@ -36,13 +36,14 @@ CREATE TABLE `animal` (
   `speed` int(11) DEFAULT NULL,
   `accountId` int(11) DEFAULT NULL,
   `typeId` int(11) DEFAULT NULL,
+  `growDay` int(11) DEFAULT NULL,
   `growLevel` int(11) DEFAULT NULL,
-  `maxGrowLevel` int(11) DEFAULT NULL,
   `sleepTime` bigint(13) DEFAULT NULL,
   `exploreTime` bigint(13) DEFAULT NULL,
   `landDiscovered` varbinary(1000) DEFAULT NULL,
   `currentLand` int(11) DEFAULT NULL,
   `moveTime` bigint(13) DEFAULT NULL,
+  `metempsychosisTime` bigint(13) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -53,7 +54,7 @@ CREATE TABLE `animal` (
 
 LOCK TABLES `animal` WRITE;
 /*!40000 ALTER TABLE `animal` DISABLE KEYS */;
-INSERT INTO `animal` VALUES (1,'tiger',500,500,150,250,100,100,50,80,70,1,2,1,40,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',5,1542095634785),(2,'tiger',500,500,250,250,100,100,50,80,70,12,2,1,40,NULL,NULL,_binary '\'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',0,NULL);
+INSERT INTO `animal` VALUES (1,'tiger',500,500,102,250,85,100,50,80,70,1,2,40,1,NULL,NULL,_binary '\�h\�\0\0@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',0,1542097174134,1542272717000),(2,'tiger',500,500,250,250,100,100,50,80,70,12,2,40,1,NULL,NULL,_binary '\'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',0,NULL,1542272717000);
 /*!40000 ALTER TABLE `animal` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -73,9 +74,11 @@ CREATE TABLE `animal_data` (
   `baseIntelligence` int(11) DEFAULT NULL,
   `baseAgile` int(11) DEFAULT NULL,
   `baseSpeed` int(11) DEFAULT NULL,
-  `maxGrowLevel` int(11) DEFAULT NULL,
+  `growDay` int(11) DEFAULT NULL COMMENT '成长天数  到达天数后可以选择转生或进阶',
+  `growLevel` int(11) DEFAULT NULL COMMENT '进阶等级',
+  `level` int(11) DEFAULT NULL COMMENT '动物级别     级别越高(1级最高)    转生成功率越低',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -84,7 +87,7 @@ CREATE TABLE `animal_data` (
 
 LOCK TABLES `animal_data` WRITE;
 /*!40000 ALTER TABLE `animal_data` DISABLE KEYS */;
-INSERT INTO `animal_data` VALUES (1,'lion',450,220,80,50,60,50,30),(2,'tiger',500,250,100,50,80,70,40);
+INSERT INTO `animal_data` VALUES (1,'lion',450,220,80,30,50,50,30,0,1),(2,'tiger',500,250,100,30,60,70,30,0,1),(3,'giraffe',400,100,40,20,20,30,10,0,5),(4,'deer',300,80,30,20,40,40,10,0,5),(5,'leopard',400,180,70,25,70,100,25,0,2),(6,'monkey ',200,60,20,40,50,50,10,0,4),(7,'elephant',700,200,80,20,20,30,10,0,4),(8,'chimpanzees',300,70,30,60,50,50,12,0,4),(9,'zebra',300,100,50,20,50,60,10,0,5),(10,'bear',600,270,120,15,40,50,30,0,1),(12,'kangaroo',400,110,60,20,50,60,20,0,3),(13,'bison',500,100,80,20,40,50,15,0,2),(14,'hedgehog',100,50,30,20,20,20,8,0,6),(15,'sheep',90,40,20,20,30,40,8,0,6),(16,'rhinoceros',500,150,90,20,20,30,12,0,3),(17,'mantis',50,20,10,15,40,20,5,0,7),(18,'grasshopper',40,15,7,15,30,20,5,0,7),(21,'ant',20,5,5,15,20,15,3,0,8);
 /*!40000 ALTER TABLE `animal_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,7 +106,7 @@ CREATE TABLE `bag_item` (
   `weight` int(11) DEFAULT NULL,
   `animalId` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +115,7 @@ CREATE TABLE `bag_item` (
 
 LOCK TABLES `bag_item` WRITE;
 /*!40000 ALTER TABLE `bag_item` DISABLE KEYS */;
-INSERT INTO `bag_item` VALUES (1,'banana',2,1,3,1),(2,'watermelon',3,1,5,1),(3,'corn',2,2,3,1),(4,'pinecone',1,0,1,1),(5,'banana',2,1,3,1),(8,'banana',2,1,3,1),(9,'tomato',2,1,2,2),(10,'watermelon',3,1,5,2),(11,'watermelon',3,1,5,2),(12,'tomato',2,1,2,2),(13,'tomato',2,1,2,2),(14,'tomato',2,1,2,2),(15,'tomato',2,1,2,2),(16,'tomato',2,1,2,2),(17,'tomato',2,1,2,2),(18,'pinecone',1,0,1,2);
+INSERT INTO `bag_item` VALUES (9,'tomato',2,1,2,2),(10,'watermelon',3,1,5,2),(11,'watermelon',3,1,5,2),(12,'tomato',2,1,2,2),(13,'tomato',2,1,2,2),(14,'tomato',2,1,2,2),(15,'tomato',2,1,2,2),(16,'tomato',2,1,2,2),(17,'tomato',2,1,2,2),(18,'pinecone',1,0,1,2),(24,'banana',2,1,3,1),(25,'pinecone',1,0,1,1),(28,'watermelon',3,1,5,1),(29,'pinecone',1,0,1,1),(30,'banana',2,1,3,1),(31,'watermelon',3,1,5,1);
 /*!40000 ALTER TABLE `bag_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -129,7 +132,7 @@ CREATE TABLE `config` (
   `value` varchar(45) DEFAULT NULL,
   `desc` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -138,7 +141,7 @@ CREATE TABLE `config` (
 
 LOCK TABLES `config` WRITE;
 /*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (1,'maxLandNumber','4000','大陆列表大小'),(3,'landMoveInterval','10','大陆之间移动时间间隔,单位秒'),(4,'moveSatietyCost','0.3','大陆之间移动消耗的饱食度百分比'),(5,'moveVigourCost','30','大陆之间移动消耗精力'),(6,'sleepVigourRecoverInterval','300','睡眠时精力恢复的最小时间单位,单位秒'),(7,'sleepVigourRecover','1','睡眠时每时间单位恢复精力'),(8,'sleepSatietyCost','0.001','睡眠时每时间单位饱食度消耗百分比'),(9,'exploreInterval','300','最小探索时间,单位秒'),(10,'plantYieldDescPerCost','10','植物消耗多少后产出率递减1'),(11,'plantYieldRecoverCycle','2592000','植物产出率恢复周期,单位秒'),(12,'plantYieldLeast','5','植物最少产出率');
+INSERT INTO `config` VALUES (1,'maxLandNumber','4000','大陆列表大小'),(3,'landMoveInterval','10','大陆之间移动时间间隔,单位秒'),(4,'moveSatietyCost','0.3','大陆之间移动消耗的饱食度百分比'),(5,'moveVigourCost','30','大陆之间移动消耗精力'),(6,'sleepVigourRecoverInterval','300','睡眠时精力恢复的最小时间单位,单位秒'),(7,'sleepVigourRecover','1','睡眠时每时间单位恢复精力'),(8,'sleepSatietyCost','0.001','睡眠时每时间单位饱食度消耗百分比'),(9,'exploreInterval','0.02','最小探索时间,单位秒  默认300'),(10,'plantYieldDescPerCost','10','植物消耗多少后产出率递减1'),(11,'plantYieldRecoverCycle','2592000','植物产出率恢复周期,单位秒'),(13,'metempsychosisRate','1,3,7,13,21,33,60,100','按等级划分的转生概率'),(14,'animalFindBaseRate','200','发现其他玩家的基础概率 默认50');
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -229,4 +232,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-13 16:12:27
+-- Dump completed on 2018-11-15 17:18:06

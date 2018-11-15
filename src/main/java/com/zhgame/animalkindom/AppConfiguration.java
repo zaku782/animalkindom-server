@@ -2,21 +2,21 @@ package com.zhgame.animalkindom;
 
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.account.service.AccountService;
-import com.zhgame.animalkindom.config.service.GameConfigService;
+import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.CookieTool;
 import com.zhgame.animalkindom.tools.JsonTool;
 import com.zhgame.animalkindom.tools.NetMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 import java.util.Optional;
 
 @Configuration
@@ -55,7 +55,7 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                             isLogin = false;
                         } else {
                             String token = cookie.get();
-                            Account accountRedis = (Account) accountService.getRedisTool().get(token);
+                            Account accountRedis = redisService.getAccountByToken(token);
                             if (accountRedis != null) {
                                 request.getSession().setAttribute("login_account", accountRedis);
                             } else {
@@ -76,14 +76,8 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
         }).addPathPatterns("/**");
     }
 
-    @Bean
-    public Map<String, String> gameConfig() {
-        System.out.println("********************************************************");
-        return gameConfigService.getGameConfig();
-    }
-
     @Resource
     AccountService accountService;
     @Resource
-    GameConfigService gameConfigService;
+    RedisService redisService;
 }

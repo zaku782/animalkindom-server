@@ -2,14 +2,14 @@ package com.zhgame.animalkindom.animal.service;
 
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.animal.entity.*;
+import com.zhgame.animalkindom.land.entity.Land;
 import com.zhgame.animalkindom.land.service.LandService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
 import com.zhgame.animalkindom.plant.entity.Plant;
-import com.zhgame.animalkindom.plant.service.PlantService;
+import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.DateTool;
 import com.zhgame.animalkindom.tools.NetMessage;
 import com.zhgame.animalkindom.tools.RandomTool;
-import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,21 +17,16 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.zhgame.animalkindom.tools.NetMessage.*;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class AnimalService {
 
-    public Animal createAnimal(Account account) {
-        List<AnimalData> animalData = animalDataService.getAllAnimalData();
-        AnimalData animalType = animalData.get(new Random().nextInt(animalData.size()));
-        Animal a = new Animal(animalType, gameConfig);
-        a.setAccountId(account.getId());
-        return a;
-    }
+    private final Integer PERCENT_MAX = 100;
 
     public Animal getByAccount(Account account) {
         Animal animal = animalRepository.getByAccountId(account.getId());
@@ -93,27 +88,34 @@ public class AnimalService {
                     .divide(new BigDecimal(gameConfig.get("exploreInterval")), 3, BigDecimal.ROUND_HALF_UP)
                     .intValue();
 
-            exploreGetTimes = 20;
+            //当前所在地图的植物产出概率,plantRate需要扣除产出减益
+            List<Land> lands = redisService.getLandData();
+            int plantRate = landService.getPlantRate(lands.stream()
+                    .filter(land -> land.getId().intValue() == animal.getCurrentLand().intValue())
+                    .findFirst()
+                    .get());
 
-            //当前所在地图的植物产出概率,plantRate需要扣除产出减益,最少保留
-            int plantRate = Math.max(landService.getLandPlantRate().get(animal.getCurrentLand()) -
-                    new BigDecimal(landService.getLandPlantCost(animal.getCurrentLand()))
-                            .divide(new BigDecimal(gameConfig.get("plantYieldDescPerCost")), BigDecimal.ROUND_DOWN).intValue(), Integer.parseInt(gameConfig.get("plantYieldLeast")));
             //计算可以获得的植物
             List<Plant> plants = Stream.iterate(0, n -> n + 1)
                     .map(n -> yieldPlant(plantRate) && discoverPlant(animal))
                     .limit(exploreGetTimes)
                     .filter(get -> get)
-                    .map(get -> getPlant()).collect(Collectors.toList());
+                    .map(get -> getPlant()).collect(toList());
+
             //清空探索时间
             animal.setExploreTime(null);
+            exploreEnd.setPlants(plants);
 
-            Map<String, List> finds = new HashMap<>();
-            finds.put("plant", plants);
-            exploreEnd.setFinds(finds);
             //redis记录探索到的资源,保存一段时间,同时用于拾取资源时服务器验证,移动到别的大陆时删除这些资源
-            redisTool.set("explore_" + animal.getId(), finds);
+            redisService.recordExplorePlants(animal.getId(), plants);
 
+            //发现玩家
+            List<Animal> animals = redisService.getLandAnimals(animal.getCurrentLand())
+                    .stream()
+                    .map(o -> (Animal) o)
+                    .filter(a -> (a.getId().longValue() != animal.getId().longValue()) && findAnimal(a, animal))
+                    .collect(toList());
+            exploreEnd.setAnimals(animals);
 
             //发现地图
         } else {
@@ -123,22 +125,29 @@ public class AnimalService {
         return exploreEnd;
     }
 
-
-    @SuppressWarnings("unchecked")
-    public Map<String, List> getFinds(Animal animal) {
-        return (Map<String, List>) redisTool.get("explore_" + animal.getId());
+    public boolean findAnimal(Animal target, Animal self) {
+        Integer base = Integer.parseInt(gameConfig.get("animalFindBaseRate"));
+        return RandomTool.happen(base + (self.getIntelligence() - target.getIntelligence()), 100);
     }
 
-    public Plant getPlant() {
-        List<Plant> plants = plantService.getPlants();
+    public List<Animal> getAnimalByLand(Integer landId) {
+        return null;
+    }
+
+    public List<Plant> getFindPlants(Animal animal) {
+        return redisService.getExplorePlants(animal.getId()).stream().map(o -> (Plant) o).collect(toList());
+    }
+
+    private Plant getPlant() {
+        List<Plant> plants = redisService.getPlants();
         return plants.get(new Random().nextInt(plants.size()));
     }
 
-    public boolean yieldPlant(int plantRate) {
+    private boolean yieldPlant(int plantRate) {
         return RandomTool.happen(plantRate, 100);
     }
 
-    public boolean discoverPlant(Animal animal) {
+    private boolean discoverPlant(Animal animal) {
         return RandomTool.happen(animal.getIntelligence(), 100);
     }
 
@@ -159,17 +168,17 @@ public class AnimalService {
     public EatEnd eatFromBag(Animal animal, Long itemId) {
         final EatEnd eatEnd = new EatEnd(0, 0);
         BagItem bagItem = bagItemRepository.getOne(itemId);
-        if (bagItem != null) {
+        if (bagItem.getId() != null) {
             Map<String, Integer> eatRecover = eat(animal, bagItem);
             eatEnd.setSatietyAdd(eatRecover.get("satiety"));
             eatEnd.setVigourAdd(eatRecover.get("vigour"));
             animalRepository.save(animal);
-            bagItemRepository.delete(itemId);
+            bagItemRepository.delete(bagItem);
         }
         return eatEnd;
     }
 
-    public Map<String, Integer> eat(Animal animal, Eatable eatable) {
+    private Map<String, Integer> eat(Animal animal, Eatable eatable) {
         Integer preSatiety = animal.getSatiety();
         Integer preVigour = animal.getVigour();
         animal.setSatiety(Math.min(animal.getBaseSatiety(), animal.getSatiety() + eatable.getSatietyAdd()));
@@ -206,21 +215,16 @@ public class AnimalService {
 
     @SuppressWarnings("unchecked")
     private NetMessage findPlantFromRedisAndOperate(Animal animal, String plantName, Function<Plant, Optional<String>> f) {
-        Map<String, List> finds = getFinds(animal);
-        Object plant = finds.get("plant");
-        if (plant != null) {
-            List<Plant> plants = (List<Plant>) plant;
-            Optional<Plant> toOperate = plants.stream().filter(p -> p.getName().equals(plantName)).findFirst();
-            if (toOperate.isPresent()) {
-                Optional<String> msg = f.apply(toOperate.get());
-                if (msg.isPresent()) {
-                    return new NetMessage(msg.get(), DANGER);
-                }
-                plants.remove(toOperate.get());
-                redisTool.set("explore_" + animal.getId(), finds);
-                //当前区域资源消耗计算
-                landService.landPlantCost(animal.getCurrentLand());
+        List<Plant> plants = getFindPlants(animal);
+        Optional<Plant> toOperate = plants.stream().filter(p -> p.getName().equals(plantName)).findFirst();
+        if (toOperate.isPresent()) {
+            Optional<String> msg = f.apply(toOperate.get());
+            if (msg.isPresent()) {
+                return new NetMessage(msg.get(), DANGER);
             }
+            redisService.consumePlant(animal.getId(), toOperate.get());
+            //当前区域资源消耗计算
+            redisService.landPlantCost(animal.getCurrentLand());
         }
         return new NetMessage(STATUS_OK, SUCCESS);
     }
@@ -229,18 +233,37 @@ public class AnimalService {
         return bagItemRepository.getByAnimalId(animal.getId());
     }
 
+
+    public Animal metempsychosis(Animal animal) {
+        List<AnimalData> animalData = redisService.getAllAnimalData();
+        Integer level = getMetempsychosisLevel(animal);
+        List<AnimalData> levelAnimals = animalData.stream()
+                .filter(data -> data.getLevel().intValue() == level.intValue())
+                .collect(toList());
+        Animal newAnimal = new Animal(levelAnimals.get(new Random().nextInt(levelAnimals.size())), gameConfig);
+        if (animal != null) {
+            newAnimal.setId(animal.getId());
+        }
+        return newAnimal;
+    }
+
+    public Integer getMetempsychosisLevel(Animal animal) {
+        Integer number = new Random().nextInt(100);
+        String[] rates = gameConfig.get("metempsychosisRate").split(",");
+        return IntStream.range(0, rates.length)
+                .filter(index -> number < Integer.parseInt(rates[index]))
+                .findFirst()
+                .getAsInt() + 1;
+    }
+
     @Resource
     private AnimalRepository animalRepository;
-    @Resource
-    private AnimalDataService animalDataService;
     @Resource
     private Map<String, String> gameConfig;
     @Resource
     private LandService landService;
     @Resource
-    private PlantService plantService;
-    @Resource
-    private RedisTool redisTool;
+    private RedisService redisService;
     @Resource
     private BagItemRepository bagItemRepository;
 }

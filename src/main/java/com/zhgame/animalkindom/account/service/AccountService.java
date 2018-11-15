@@ -3,10 +3,11 @@ package com.zhgame.animalkindom.account.service;
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.service.AnimalService;
+import com.zhgame.animalkindom.land.service.LandService;
+import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.CookieTool;
 import com.zhgame.animalkindom.tools.MD5Tool;
 import com.zhgame.animalkindom.tools.NetMessage;
-import com.zhgame.animalkindom.tools.RedisTool;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,7 +106,7 @@ public class AccountService {
         }
         encrypt(account);
         Account accountDb = accountRepository.save(account);
-        Animal animal = animalService.createAnimal(account);
+        Animal animal = animalService.metempsychosis(null);
         animalService.save(animal);
         this.LogAccount(request, response, accountDb);
 
@@ -137,15 +138,20 @@ public class AccountService {
         CookieTool.setCookies(response, "ak_token", token);
         Account accountSession = new Account(account.getId(), account.getName());
         request.getSession().setAttribute("login_account", accountSession);
-        redisTool.set(token, accountSession, CookieTool.COOKIE_TIME);
+        //记录位置
+        Animal animal = animalService.getByAccount(accountSession);
+        redisService.moveToLand(animal.getCurrentLand(), animal);
+        redisService.addToken(token, accountSession);
     }
 
     private void clearAccount(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Optional<String> cookie = CookieTool.getCookies(request, "ak_token");
         if (cookie.isPresent()) {
-            redisTool.del(cookie.get());
+            redisService.removeToken(cookie.get());
             CookieTool.cleanCookies(response, "ak_token");
         }
+        Animal animal = animalService.getByAccount(getLoginAccount(request));
+        redisService.leaveLand(animal.getCurrentLand(), animal);
         request.getSession().setAttribute("login_account", null);
     }
 
@@ -158,14 +164,12 @@ public class AccountService {
         account.setSalt(salt);
     }
 
-    public RedisTool getRedisTool() {
-        return redisTool;
-    }
-
     @Resource
     private AccountRepository accountRepository;
     @Resource
     private AnimalService animalService;
     @Resource
-    private RedisTool redisTool;
+    private RedisService redisService;
+    @Resource
+    private LandService landService;
 }

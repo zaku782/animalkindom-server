@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "config")
-public class GameConfig {
+public class GameConfigData {
     @Id
     private Integer id;
     private String prop;

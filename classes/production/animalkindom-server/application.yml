@@ -8,7 +8,7 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: false
+    show-sql: true
   mvc:
     dispatch-options-request: true
   redis:
@@ -18,7 +18,6 @@ spring:
 server:
   compression.enabled: true
   compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript
-
 system:
   env: dev
 

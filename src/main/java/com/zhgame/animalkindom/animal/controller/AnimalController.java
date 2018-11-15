@@ -5,7 +5,6 @@ import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.entity.SleepEnd;
 import com.zhgame.animalkindom.animal.service.AnimalService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
-import com.zhgame.animalkindom.tools.BitArray;
 import com.zhgame.animalkindom.tools.NetMessage;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +20,6 @@ public class AnimalController {
     @RequestMapping("/animal/getInfo/")
     public NetMessage getAnimal(HttpServletRequest request) throws Exception {
         Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
-        byte[] map = animal.getLandDiscovered();
-        BitArray bitArray = new BitArray(map);
-        //bitArray.show();
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animal);
     }
 
@@ -48,10 +44,10 @@ public class AnimalController {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, isExploring);
     }
 
-    @RequestMapping("/animal/getFinds/")
-    public NetMessage getFinds(HttpServletRequest request) throws Exception {
+    @RequestMapping("/animal/getFindPlants/")
+    public NetMessage getFindPlants(HttpServletRequest request) throws Exception {
         Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
-        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getFinds(animal));
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getFindPlants(animal));
     }
 
     @RequestMapping("/animal/eatAtOnce/{plantName}/")
@@ -82,6 +78,13 @@ public class AnimalController {
     public NetMessage getBagItems(HttpServletRequest request) throws Exception {
         Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getBagItems(animal));
+    }
+
+    @RequestMapping("/animal/metempsychosis/")
+    public NetMessage metempsychosis(HttpServletRequest request) throws Exception {
+        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
+        animalService.metempsychosis(animal);
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
     @Resource

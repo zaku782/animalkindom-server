@@ -3,10 +3,11 @@ package com.zhgame.animalkindom.land.entity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "land")
-public class Land {
+public class Land implements Serializable {
 
     @Id
     private Integer id;
