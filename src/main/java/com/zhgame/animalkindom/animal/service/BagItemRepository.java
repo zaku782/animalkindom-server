@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface BagItemRepository extends JpaRepository<BagItem, Long> {
     List<BagItem> getByAnimalId(Long animalId);
+
+    void deleteByAnimalId(Long animalId);
 }

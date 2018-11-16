@@ -28,7 +28,7 @@ public class Animal {
     private Integer agile;
     private Integer speed;
     private Long accountId;
-    private Long typeId;
+    private Integer typeId;
     private Integer growDay;
     private Integer growLevel;
     private Long sleepTime;
@@ -37,6 +37,8 @@ public class Animal {
     private byte[] landDiscovered;
     private Long moveTime;
     private Long metempsychosisTime;
+    private Integer souls;
+    private Integer point;
 
     @Transient
     private Integer days;
@@ -64,11 +66,9 @@ public class Animal {
         this.growLevel = animalData.getGrowLevel();
         this.currentLand = 0;
         this.metempsychosisTime = DateTool.getNowMillis();
+        this.souls = 0;
         BitArray mapDiscovered = new BitArray(Integer.parseInt(gameConfig.get("maxLandNumber")));
         mapDiscovered.set(0, true);
-        mapDiscovered.set(1, true);
-        mapDiscovered.set(2, true);
-        mapDiscovered.set(5, true);
         this.landDiscovered = mapDiscovered.getBits();
     }
 
@@ -92,11 +92,11 @@ public class Animal {
         this.name = name;
     }
 
-    public Long getTypeId() {
+    public Integer getTypeId() {
         return typeId;
     }
 
-    public void setTypeId(Long typeId) {
+    public void setTypeId(Integer typeId) {
         this.typeId = typeId;
     }
 
@@ -266,5 +266,21 @@ public class Animal {
 
     public void setDays(Integer days) {
         this.days = days;
+    }
+
+    public Integer getSouls() {
+        return souls;
+    }
+
+    public void setSouls(Integer souls) {
+        this.souls = souls;
+    }
+
+    public Integer getPoint() {
+        return point;
+    }
+
+    public void setPoint(Integer point) {
+        this.point = point;
     }
 }

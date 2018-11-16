@@ -106,10 +106,8 @@ public class AccountService {
         }
         encrypt(account);
         Account accountDb = accountRepository.save(account);
-        Animal animal = animalService.metempsychosis(null);
-        animalService.save(animal);
+        animalService.metempsychosis(accountDb);
         this.LogAccount(request, response, accountDb);
-
         return new NetMessage("ok", NetMessage.SUCCESS);
     }
 

@@ -233,22 +233,89 @@ public class AnimalService {
         return bagItemRepository.getByAnimalId(animal.getId());
     }
 
+    /**
+     * 新生
+     *
+     * @param account 关联账号
+     */
+    public void metempsychosis(Account account) {
+        this.metempsychosis(null, account, 0);
+    }
 
-    public Animal metempsychosis(Animal animal) {
+    /**
+     * 转生
+     *
+     * @param animal   现世物种
+     * @param account  关联账号
+     * @param useSouls 使用魂值
+     */
+    @Transactional
+    public NetMessage metempsychosis(Animal animal, Account account, Integer useSouls) {
+
+        if (animal != null) {
+            if (useSouls > animal.getSouls()) {
+                return new NetMessage(NetMessage.STATUS_OK, NetMessage.DANGER, NetMessage.STATUS_INVALID_OPERATION);
+            }
+        }
+
         List<AnimalData> animalData = redisService.getAllAnimalData();
-        Integer level = getMetempsychosisLevel(animal);
+
+        Integer number = new Random().nextInt(100);
+
+        if (animal != null) {
+            number = number - new BigDecimal(useSouls)
+                    .divide(new BigDecimal(gameConfig.get("metempsychosisRateBuffPerSouls")), BigDecimal.ROUND_DOWN)
+                    .intValue();
+
+            number = Math.max(0, number);
+        }
+
+        Integer level = getMetempsychosisLevel(animal, number);
+
         List<AnimalData> levelAnimals = animalData.stream()
                 .filter(data -> data.getLevel().intValue() == level.intValue())
                 .collect(toList());
+
         Animal newAnimal = new Animal(levelAnimals.get(new Random().nextInt(levelAnimals.size())), gameConfig);
+
         if (animal != null) {
             newAnimal.setId(animal.getId());
+            if (newAnimal.getTypeId().intValue() == animal.getTypeId().intValue()) {
+                newAnimal.setGrowLevel(animal.getGrowLevel() + 1);
+                upgrade(newAnimal);
+            }
+
+            newAnimal.setPoint(new BigDecimal(animal.getSouls() - useSouls)
+                    .divide(new BigDecimal(gameConfig.get("pointGetPerSouls")), BigDecimal.ROUND_DOWN)
+                    .intValue());
         }
-        return newAnimal;
+
+        newAnimal.setAccountId(account.getId());
+
+        animalRepository.save(newAnimal);
+
+        //清空行囊
+        bagItemRepository.deleteByAnimalId(animal.getId());
+
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
-    public Integer getMetempsychosisLevel(Animal animal) {
-        Integer number = new Random().nextInt(100);
+    public void upgrade(Animal animal) {
+        Integer level = animal.getGrowLevel();
+        animal.setAgile(propUpgrade(animal.getAgile(), level));
+        animal.setStrength(propUpgrade(animal.getStrength(), level));
+        animal.setIntelligence(propUpgrade(animal.getIntelligence(), level));
+        animal.setSpeed(propUpgrade(animal.getSpeed(), level));
+    }
+
+    public Integer propUpgrade(Integer old, Integer level) {
+        return new BigDecimal(old)
+                .multiply(new BigDecimal(1)
+                        .add(new BigDecimal(gameConfig.get("levelBuff"))
+                                .multiply(new BigDecimal(level)))).intValue();
+    }
+
+    public Integer getMetempsychosisLevel(Animal animal, Integer number) {
         String[] rates = gameConfig.get("metempsychosisRate").split(",");
         return IntStream.range(0, rates.length)
                 .filter(index -> number < Integer.parseInt(rates[index]))

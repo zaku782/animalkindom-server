@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class AnimalData implements Serializable {
 
     @Id
-    private Long id;
+    private Integer id;
 
     private String name;
     private Integer baseHealth;
@@ -21,11 +21,11 @@ public class AnimalData implements Serializable {
     private Integer growLevel;
     private Integer level;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

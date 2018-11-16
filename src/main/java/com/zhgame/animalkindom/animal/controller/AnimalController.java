@@ -1,5 +1,6 @@
 package com.zhgame.animalkindom.animal.controller;
 
+import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.account.service.AccountService;
 import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.entity.SleepEnd;
@@ -80,11 +81,11 @@ public class AnimalController {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS, animalService.getBagItems(animal));
     }
 
-    @RequestMapping("/animal/metempsychosis/")
-    public NetMessage metempsychosis(HttpServletRequest request) throws Exception {
-        Animal animal = animalService.getByAccount(accountService.getLoginAccount(request));
-        animalService.metempsychosis(animal);
-        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+    @RequestMapping("/animal/metempsychosis/{useSouls}")
+    public NetMessage metempsychosis(@PathVariable("useSouls") Integer useSouls, HttpServletRequest request) throws Exception {
+        Account account = accountService.getLoginAccount(request);
+        Animal animal = animalService.getByAccount(account);
+        return animalService.metempsychosis(animal, account, useSouls);
     }
 
     @Resource
