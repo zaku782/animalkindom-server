@@ -3,11 +3,13 @@ package com.zhgame.animalkindom.animal.controller;
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.account.service.AccountService;
 import com.zhgame.animalkindom.animal.entity.Animal;
+import com.zhgame.animalkindom.animal.entity.PointAdd;
 import com.zhgame.animalkindom.animal.entity.SleepEnd;
 import com.zhgame.animalkindom.animal.service.AnimalService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
 import com.zhgame.animalkindom.tools.NetMessage;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,6 +88,13 @@ public class AnimalController {
         Account account = accountService.getLoginAccount(request);
         Animal animal = animalService.getByAccount(account);
         return animalService.metempsychosis(animal, account, useSouls);
+    }
+
+    @RequestMapping("/animal/addPoint/")
+    public NetMessage addPoint(@RequestBody PointAdd pointAdd, HttpServletRequest request) throws Exception {
+        Account account = accountService.getLoginAccount(request);
+        Animal animal = animalService.getByAccount(account);
+        return animalService.addPoint(animal, pointAdd);
     }
 
     @Resource

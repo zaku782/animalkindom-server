@@ -323,6 +323,23 @@ public class AnimalService {
                 .getAsInt() + 1;
     }
 
+    public NetMessage addPoint(Animal animal, PointAdd pointAdd) {
+
+        if (pointAdd.sum() > animal.getPoint()) {
+            return new NetMessage(NetMessage.STATUS_OK, NetMessage.DANGER, NetMessage.STATUS_INVALID_OPERATION);
+        }
+
+        animal.setStrength(animal.getStrength() + pointAdd.getStrengthAdd());
+        animal.setIntelligence(animal.getIntelligence() + pointAdd.getIntelligenceAdd());
+        animal.setAgile(animal.getAgile() + pointAdd.getAgileAdd());
+        animal.setSpeed(animal.getSpeed() + pointAdd.getSpeedAdd());
+        animal.setPoint(animal.getPoint() - pointAdd.sum());
+
+        animalRepository.save(animal);
+
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+    }
+
     @Resource
     private AnimalRepository animalRepository;
     @Resource
