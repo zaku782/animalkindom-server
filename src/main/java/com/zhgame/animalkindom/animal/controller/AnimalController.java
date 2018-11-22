@@ -97,6 +97,14 @@ public class AnimalController {
         return animalService.addPoint(animal, pointAdd);
     }
 
+    @RequestMapping("/animal/makeFriend/{animalId}")
+    public NetMessage makeFriend(@PathVariable("animalId") String animalId, HttpServletRequest request) throws Exception {
+        Account account = accountService.getLoginAccount(request);
+        Animal animal = animalService.getByAccount(account);
+        animalService.makeFriend(animal, animalId);
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+    }
+
     @Resource
     private AnimalService animalService;
     @Resource

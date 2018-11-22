@@ -153,8 +153,6 @@ public class RedisTool {
         return redisTemplate.opsForValue().increment(key, -delta);
     }
 
-    //================================Land=================================
-
     /**
      * HashGet
      *
@@ -175,6 +173,7 @@ public class RedisTool {
     public Map<Object, Object> hmget(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
+
 
     /**
      * HashSet

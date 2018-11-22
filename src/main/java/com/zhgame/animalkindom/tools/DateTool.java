@@ -8,6 +8,10 @@ public class DateTool {
         return System.currentTimeMillis();
     }
 
+    public static LocalDateTime getNowDateTime() {
+        return LocalDateTime.now();
+    }
+
     public static String getNowString() {
         return LocalDate.now().toString();
     }

@@ -21,8 +21,10 @@ import java.util.*;
 public class RedisService {
 
     public final String EXPLORE_PLANTS_KEY = "explore_plants_";
+    public final String EXPLORE_ANIMALS_KEY = "explore_animals_";
     public final String LAND_PLANT_COST = "land_plant_cost_";
     private final String LAND_ANIMAL_KEY = "land_animals";
+    private final String SOCKET_KET = "sockets";
 
     @Cacheable(value = "land_datas")
     public List<Land> getLandData() {
@@ -54,6 +56,11 @@ public class RedisService {
     public void recordExplorePlants(final Long animalId, List<Plant> plants) {
         redisTool.del(EXPLORE_PLANTS_KEY + animalId);
         plants.forEach(plant -> redisTool.lSet(EXPLORE_PLANTS_KEY + animalId, plant));
+    }
+
+    public void recordExploreAnimals(final Long animalId, List<Animal> animals) {
+        redisTool.del(EXPLORE_ANIMALS_KEY + animalId);
+        animals.forEach(animal -> redisTool.lSet(EXPLORE_ANIMALS_KEY + animalId, animal));
     }
 
     public List<Object> getExplorePlants(Long animalId) {
@@ -91,6 +98,9 @@ public class RedisService {
     }
 
     public void leaveLand(Integer landId, Animal animal) {
+        //离开大陆时,清除已发现的资源
+        redisTool.del(EXPLORE_PLANTS_KEY + animal.getId());
+        redisTool.del(EXPLORE_ANIMALS_KEY + animal.getId());
         redisTool.setRemove(LAND_ANIMAL_KEY + "_" + landId, animal);
     }
 
@@ -101,7 +111,6 @@ public class RedisService {
         }
         return animals;
     }
-
 
     @Resource
     private AnimalDataRepository animalDataRepository;

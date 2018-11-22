@@ -2,6 +2,9 @@ package com.zhgame.animalkindom.animal.service;
 
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.animal.entity.*;
+import com.zhgame.animalkindom.event.entity.Event;
+import com.zhgame.animalkindom.event.entity.FriendEvent;
+import com.zhgame.animalkindom.event.service.EventRepository;
 import com.zhgame.animalkindom.land.entity.Land;
 import com.zhgame.animalkindom.land.service.LandService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
@@ -10,10 +13,12 @@ import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.DateTool;
 import com.zhgame.animalkindom.tools.NetMessage;
 import com.zhgame.animalkindom.tools.RandomTool;
+import com.zhgame.animalkindom.websocket.WebSocketServer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
@@ -116,6 +121,7 @@ public class AnimalService {
                     .filter(a -> (a.getId().longValue() != animal.getId().longValue()) && findAnimal(a, animal))
                     .collect(toList());
             exploreEnd.setAnimals(animals);
+            redisService.recordExploreAnimals(animal.getId(), animals);
 
             //发现地图
         } else {
@@ -340,6 +346,20 @@ public class AnimalService {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
+    public void makeFriend(Animal animal, String toWho) throws IOException {
+        WebSocketServer.sendInfo("friend_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
+        //记录到事件表中
+        Event event = new Event();
+        event.setSender(animal.getId());
+        event.setSenderName(animal.getAccountName());
+        event.setSenderSpecies(animal.getName());
+        event.setReceiver(Long.parseLong(toWho));
+        event.setReaded(false);
+        event.setDateTime(DateTool.getNowDateTime());
+        event.setType(FriendEvent.TYPE_FRIEND_REQUEST);
+        eventRepository.save(event);
+    }
+
     @Resource
     private AnimalRepository animalRepository;
     @Resource
@@ -350,4 +370,6 @@ public class AnimalService {
     private RedisService redisService;
     @Resource
     private BagItemRepository bagItemRepository;
+    @Resource
+    private EventRepository eventRepository;
 }

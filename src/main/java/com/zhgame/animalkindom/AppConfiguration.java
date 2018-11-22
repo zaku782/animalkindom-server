@@ -2,10 +2,14 @@ package com.zhgame.animalkindom;
 
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.account.service.AccountService;
+import com.zhgame.animalkindom.animal.entity.Animal;
+import com.zhgame.animalkindom.animal.service.AnimalService;
+import com.zhgame.animalkindom.event.service.EventService;
 import com.zhgame.animalkindom.redis.service.RedisService;
 import com.zhgame.animalkindom.tools.CookieTool;
 import com.zhgame.animalkindom.tools.JsonTool;
 import com.zhgame.animalkindom.tools.NetMessage;
+import com.zhgame.animalkindom.websocket.WebSocketServer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -47,8 +51,10 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                 if (request.getRequestURL().indexOf("/signIn/") == -1
                         && request.getRequestURL().indexOf("/signOut/") == -1
                         && request.getRequestURL().indexOf("/signUp/") == -1) {
+
                     boolean isLogin = true;
                     Account account = accountService.getLoginAccount(request);
+
                     if (account == null) {
                         Optional<String> cookie = CookieTool.getCookies(request, "ak_token");
                         if (!cookie.isPresent()) {
@@ -58,11 +64,17 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
                             Account accountRedis = redisService.getAccountByToken(token);
                             if (accountRedis != null) {
                                 request.getSession().setAttribute("login_account", accountRedis);
+                                //从cookie登陆成功,获取未读事件
+                                Animal animal = animalService.getByAccount(accountRedis);
+                                if (eventService.hasUnReadEvent(animal.getId())) {
+                                    WebSocketServer.sendInfo(NetMessage.UNREAD_MSG, animal.getId().toString());
+                                }
                             } else {
                                 isLogin = false;
                             }
                         }
                     }
+
                     if (!isLogin) {
                         if (!request.getRequestURI().equals("/")) {
                             response.getWriter().write(JsonTool
@@ -79,5 +91,9 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
     @Resource
     AccountService accountService;
     @Resource
+    AnimalService animalService;
+    @Resource
     RedisService redisService;
+    @Resource
+    EventService eventService;
 }
