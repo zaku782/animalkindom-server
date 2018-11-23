@@ -1,6 +1,7 @@
 package com.zhgame.animalkindom.event.service;
 
 import com.zhgame.animalkindom.event.entity.Event;
+import com.zhgame.animalkindom.event.entity.FriendEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -10,13 +11,17 @@ import java.util.List;
 public class EventService {
 
     public boolean hasUnReadEvent(Long animalId) {
-        return eventRepository.getAllByReceiverAndReaded(animalId, false).size() > 0;
+        return friendEventRepository.getAllByReceiverAndReaded(animalId, false).size() > 0;
     }
 
     public List<Event> friendEvents(Long animalId) {
-        return eventRepository.getAllByReceiverOrderByDateTimeDesc(animalId);
+        return friendEventRepository.getAllByReceiverOrderByDateTimeDesc(animalId);
+    }
+
+    public void saveFriendEvent(FriendEvent event) {
+        friendEventRepository.save(event);
     }
 
     @Resource
-    private EventRepository eventRepository;
+    private FriendEventRepository friendEventRepository;
 }

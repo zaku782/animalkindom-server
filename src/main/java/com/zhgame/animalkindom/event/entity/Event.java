@@ -13,6 +13,7 @@ public class Event {
     private boolean readed;
     private LocalDateTime dateTime;
     private String type;
+    private boolean done;
 
     public Long getSender() {
         return sender;
@@ -68,5 +69,13 @@ public class Event {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 }

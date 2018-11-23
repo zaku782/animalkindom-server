@@ -2,9 +2,8 @@ package com.zhgame.animalkindom.animal.service;
 
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.animal.entity.*;
-import com.zhgame.animalkindom.event.entity.Event;
 import com.zhgame.animalkindom.event.entity.FriendEvent;
-import com.zhgame.animalkindom.event.service.EventRepository;
+import com.zhgame.animalkindom.event.service.EventService;
 import com.zhgame.animalkindom.land.entity.Land;
 import com.zhgame.animalkindom.land.service.LandService;
 import com.zhgame.animalkindom.plant.entity.ExploreEnd;
@@ -347,9 +346,8 @@ public class AnimalService {
     }
 
     public void makeFriend(Animal animal, String toWho) throws IOException {
-        WebSocketServer.sendInfo("friend_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
         //记录到事件表中
-        Event event = new Event();
+        FriendEvent event = new FriendEvent();
         event.setSender(animal.getId());
         event.setSenderName(animal.getAccountName());
         event.setSenderSpecies(animal.getName());
@@ -357,7 +355,10 @@ public class AnimalService {
         event.setReaded(false);
         event.setDateTime(DateTool.getNowDateTime());
         event.setType(FriendEvent.TYPE_FRIEND_REQUEST);
-        eventRepository.save(event);
+        event.setDone(false);
+        eventService.saveFriendEvent(event);
+        //发送消息
+        WebSocketServer.sendInfo("friend_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
     }
 
     @Resource
@@ -371,5 +372,5 @@ public class AnimalService {
     @Resource
     private BagItemRepository bagItemRepository;
     @Resource
-    private EventRepository eventRepository;
+    private EventService eventService;
 }
