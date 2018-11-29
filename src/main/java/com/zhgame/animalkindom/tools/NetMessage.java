@@ -17,6 +17,7 @@ public class NetMessage {
     public static String NOT_ENOUGH_VIGOUR = "not_enough_vigour";
     public static String BAG_FULL = "bag_full";
     public static String UNREAD_MSG = "unread_msg";
+    public static String WAIT_FOR_ANSWER = "wait_for_answer";
 
     private String type;
     private String content;

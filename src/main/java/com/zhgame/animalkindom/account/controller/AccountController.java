@@ -38,5 +38,5 @@ public class AccountController {
     }
 
     @Resource
-    AccountService accountService;
+    private AccountService accountService;
 }

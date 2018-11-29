@@ -72,14 +72,13 @@ public class Animal {
         this.landDiscovered = mapDiscovered.getBits();
     }
 
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Animal && ((Animal) obj).getId().longValue() == this.id.longValue();
+    public AnimalSimple getSimple() {
+        AnimalSimple simple = new AnimalSimple();
+        simple.setId(this.getId());
+        simple.setName(this.getName());
+        simple.setAccountName(this.getAccountName());
+        simple.setIntelligence(this.getIntelligence());
+        return simple;
     }
 
     private Integer convert(float multi, Integer value) {

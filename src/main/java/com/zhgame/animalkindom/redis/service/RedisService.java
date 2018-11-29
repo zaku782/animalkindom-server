@@ -3,6 +3,7 @@ package com.zhgame.animalkindom.redis.service;
 import com.zhgame.animalkindom.account.entity.Account;
 import com.zhgame.animalkindom.animal.entity.Animal;
 import com.zhgame.animalkindom.animal.entity.AnimalData;
+import com.zhgame.animalkindom.animal.entity.AnimalSimple;
 import com.zhgame.animalkindom.animal.service.AnimalDataRepository;
 import com.zhgame.animalkindom.config.service.GameConfigDataRepository;
 import com.zhgame.animalkindom.land.entity.Land;
@@ -20,10 +21,10 @@ import java.util.*;
 @Component
 public class RedisService {
 
-    public final String EXPLORE_PLANTS_KEY = "explore_plants_";
-    public final String EXPLORE_ANIMALS_KEY = "explore_animals_";
-    public final String LAND_PLANT_COST = "land_plant_cost_";
-    private final String LAND_ANIMAL_KEY = "land_animals";
+    private final String EXPLORE_PLANTS_KEY = "explore_plants_";
+    private final String EXPLORE_ANIMALS_KEY = "explore_animals_";
+    private final String LAND_PLANT_COST = "land_plant_cost_";
+    private final String LAND_ANIMAL_KEY = "land_animals_";
     private final String SOCKET_KET = "sockets";
 
     @Cacheable(value = "land_datas")
@@ -58,7 +59,7 @@ public class RedisService {
         plants.forEach(plant -> redisTool.lSet(EXPLORE_PLANTS_KEY + animalId, plant));
     }
 
-    public void recordExploreAnimals(final Long animalId, List<Animal> animals) {
+    public void recordExploreAnimals(final Long animalId, List<AnimalSimple> animals) {
         redisTool.del(EXPLORE_ANIMALS_KEY + animalId);
         animals.forEach(animal -> redisTool.lSet(EXPLORE_ANIMALS_KEY + animalId, animal));
     }
@@ -94,18 +95,18 @@ public class RedisService {
     }
 
     public void moveToLand(Integer landId, Animal animal) {
-        redisTool.sSet(LAND_ANIMAL_KEY + "_" + landId, animal);
+        redisTool.sSet(LAND_ANIMAL_KEY + landId, animal.getSimple());
     }
 
     public void leaveLand(Integer landId, Animal animal) {
         //离开大陆时,清除已发现的资源
         redisTool.del(EXPLORE_PLANTS_KEY + animal.getId());
         redisTool.del(EXPLORE_ANIMALS_KEY + animal.getId());
-        redisTool.setRemove(LAND_ANIMAL_KEY + "_" + landId, animal);
+        redisTool.setRemove(LAND_ANIMAL_KEY + landId, animal.getSimple());
     }
 
     public Set<Object> getLandAnimals(Integer landId) {
-        Set<Object> animals = redisTool.sGet(LAND_ANIMAL_KEY + "_" + landId);
+        Set<Object> animals = redisTool.sGet(LAND_ANIMAL_KEY + landId);
         if (animals == null) {
             animals = new HashSet<>();
         }

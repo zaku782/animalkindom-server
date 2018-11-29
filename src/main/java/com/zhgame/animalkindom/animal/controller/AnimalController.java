@@ -101,8 +101,7 @@ public class AnimalController {
     public NetMessage makeFriend(@PathVariable("animalId") String animalId, HttpServletRequest request) throws Exception {
         Account account = accountService.getLoginAccount(request);
         Animal animal = animalService.getByAccount(account);
-        animalService.makeFriend(animal, animalId);
-        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+        return animalService.makeFriend(animal, animalId);
     }
 
     @Resource

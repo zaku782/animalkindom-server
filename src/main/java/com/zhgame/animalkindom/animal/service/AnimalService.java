@@ -114,9 +114,9 @@ public class AnimalService {
             redisService.recordExplorePlants(animal.getId(), plants);
 
             //发现玩家
-            List<Animal> animals = redisService.getLandAnimals(animal.getCurrentLand())
+            List<AnimalSimple> animals = redisService.getLandAnimals(animal.getCurrentLand())
                     .stream()
-                    .map(o -> (Animal) o)
+                    .map(o -> (AnimalSimple) o)
                     .filter(a -> (a.getId().longValue() != animal.getId().longValue()) && findAnimal(a, animal))
                     .collect(toList());
             exploreEnd.setAnimals(animals);
@@ -130,7 +130,7 @@ public class AnimalService {
         return exploreEnd;
     }
 
-    public boolean findAnimal(Animal target, Animal self) {
+    private boolean findAnimal(AnimalSimple target, Animal self) {
         Integer base = Integer.parseInt(gameConfig.get("animalFindBaseRate"));
         return RandomTool.happen(base + (self.getIntelligence() - target.getIntelligence()), 100);
     }
@@ -244,7 +244,8 @@ public class AnimalService {
      * @param account 关联账号
      */
     public void metempsychosis(Account account) {
-        this.metempsychosis(null, account, 0);
+        Animal newAnimal = metempsychosis(account, 0);
+        animalRepository.save(newAnimal);
     }
 
     /**
@@ -257,55 +258,72 @@ public class AnimalService {
     @Transactional
     public NetMessage metempsychosis(Animal animal, Account account, Integer useSouls) {
 
-        if (animal != null) {
-            if (useSouls > animal.getSouls()) {
-                return new NetMessage(NetMessage.STATUS_OK, NetMessage.DANGER, NetMessage.STATUS_INVALID_OPERATION);
-            }
+        if (useSouls > animal.getSouls()) {
+            return new NetMessage(NetMessage.STATUS_OK, NetMessage.DANGER, NetMessage.STATUS_INVALID_OPERATION);
         }
 
-        List<AnimalData> animalData = redisService.getAllAnimalData();
+        Animal newAnimal = metempsychosis(account, useSouls);
+        newAnimal.setId(animal.getId());
+        newAnimal.setCurrentLand(animal.getCurrentLand());
+        newAnimal.setLandDiscovered(animal.getLandDiscovered());
+        newAnimal.setAccountName(animal.getAccountName());
 
-        Integer number = new Random().nextInt(100);
-
-        if (animal != null) {
-            number = number - new BigDecimal(useSouls)
-                    .divide(new BigDecimal(gameConfig.get("metempsychosisRateBuffPerSouls")), BigDecimal.ROUND_DOWN)
-                    .intValue();
-
-            number = Math.max(0, number);
+        if (newAnimal.getTypeId().intValue() == animal.getTypeId().intValue()) {
+            newAnimal.setGrowLevel(animal.getGrowLevel() + 1);
+            upgrade(newAnimal);
+        } else {
+            //如果物种发生变化,将原物种从大陆移除,新物种进入大陆
+            redisService.leaveLand(newAnimal.getCurrentLand(), animal);
+            redisService.moveToLand(newAnimal.getCurrentLand(), newAnimal);
         }
 
-        Integer level = getMetempsychosisLevel(animal, number);
-
-        List<AnimalData> levelAnimals = animalData.stream()
-                .filter(data -> data.getLevel().intValue() == level.intValue())
-                .collect(toList());
-
-        Animal newAnimal = new Animal(levelAnimals.get(new Random().nextInt(levelAnimals.size())), gameConfig);
-
-        if (animal != null) {
-            newAnimal.setId(animal.getId());
-            if (newAnimal.getTypeId().intValue() == animal.getTypeId().intValue()) {
-                newAnimal.setGrowLevel(animal.getGrowLevel() + 1);
-                upgrade(newAnimal);
-            }
-
-            newAnimal.setPoint(new BigDecimal(animal.getSouls() - useSouls)
-                    .divide(new BigDecimal(gameConfig.get("pointGetPerSouls")), BigDecimal.ROUND_DOWN)
-                    .intValue());
-        }
-
-        newAnimal.setAccountId(account.getId());
+        newAnimal.setPoint(new BigDecimal(animal.getSouls() - useSouls)
+                .divide(new BigDecimal(gameConfig.get("pointGetPerSouls")), BigDecimal.ROUND_DOWN)
+                .intValue());
 
         animalRepository.save(newAnimal);
-
         //清空行囊
         bagItemRepository.deleteByAnimalId(animal.getId());
 
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
-    public void upgrade(Animal animal) {
+    /**
+     * 新物种
+     *
+     * @return
+     */
+    private Animal metempsychosis(Account account, Integer useSouls) {
+        List<AnimalData> animalData = redisService.getAllAnimalData();
+
+        Integer number = new Random().nextInt(100);
+
+        number = number - new BigDecimal(useSouls)
+                .divide(new BigDecimal(gameConfig.get("metempsychosisRateBuffPerSouls")), BigDecimal.ROUND_DOWN)
+                .intValue();
+
+        number = Math.max(0, number);
+
+        Integer level = getMetempsychosisLevel(number);
+
+        //获取对应等级的物种
+        List<AnimalData> levelAnimals = animalData.stream()
+                .filter(data -> data.getLevel().intValue() == level.intValue())
+                .collect(toList());
+
+        //随机产生新物种
+        Animal newAnimal = new Animal(levelAnimals.get(new Random().nextInt(levelAnimals.size())), gameConfig);
+        newAnimal.setAccountId(account.getId());
+
+        return newAnimal;
+    }
+
+    /**
+     * 升级
+     *
+     * @param animal 要升级的动物
+     */
+    private void upgrade(Animal animal) {
         Integer level = animal.getGrowLevel();
         animal.setAgile(propUpgrade(animal.getAgile(), level));
         animal.setStrength(propUpgrade(animal.getStrength(), level));
@@ -313,14 +331,27 @@ public class AnimalService {
         animal.setSpeed(propUpgrade(animal.getSpeed(), level));
     }
 
-    public Integer propUpgrade(Integer old, Integer level) {
+    /**
+     * 属性升级
+     *
+     * @param old   原属性值
+     * @param level 等级
+     * @return 返回升级后的属性值
+     */
+    Integer propUpgrade(Integer old, Integer level) {
         return new BigDecimal(old)
                 .multiply(new BigDecimal(1)
                         .add(new BigDecimal(gameConfig.get("levelBuff"))
                                 .multiply(new BigDecimal(level)))).intValue();
     }
 
-    public Integer getMetempsychosisLevel(Animal animal, Integer number) {
+    /**
+     * 获得转生后的物种等级
+     *
+     * @param number 转生随机数
+     * @return 转生随机数对应的物种等级
+     */
+    private Integer getMetempsychosisLevel(Integer number) {
         String[] rates = gameConfig.get("metempsychosisRate").split(",");
         return IntStream.range(0, rates.length)
                 .filter(index -> number < Integer.parseInt(rates[index]))
@@ -328,6 +359,11 @@ public class AnimalService {
                 .getAsInt() + 1;
     }
 
+    /**
+     * @param animal
+     * @param pointAdd 属性点
+     * @return
+     */
     public NetMessage addPoint(Animal animal, PointAdd pointAdd) {
 
         if (pointAdd.sum() > animal.getPoint()) {
@@ -345,7 +381,13 @@ public class AnimalService {
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
-    public void makeFriend(Animal animal, String toWho) throws IOException {
+    public NetMessage makeFriend(Animal animal, String toWho) throws IOException {
+
+        //如果存在同一目标且未处理的好友请求事件，不再记录和发出消息
+        if (eventService.haveRequested(animal.getId(), Long.parseLong(toWho))) {
+            return new NetMessage(NetMessage.WAIT_FOR_ANSWER, NetMessage.DANGER);
+        }
+
         //记录到事件表中
         FriendEvent event = new FriendEvent();
         event.setSender(animal.getId());
@@ -359,6 +401,7 @@ public class AnimalService {
         eventService.saveFriendEvent(event);
         //发送消息
         WebSocketServer.sendInfo("friend_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 
     @Resource

@@ -34,19 +34,11 @@ public class AccountService {
         accountRepository.save(a);
     }
 
-    public boolean inputCheck(Account account) {
-
-        if (account.getName() == null || account.getName().equals("")) {
-            return false;
-        }
-        if (account.getPassword() == null || account.getPassword().equals("")) {
-            return false;
-        }
-
-        return true;
+    private boolean inputCheck(Account account) {
+        return !(account.getName() == null || account.getName().equals("")) && !(account.getPassword() == null || account.getPassword().equals(""));
     }
 
-    public NetMessage signUpValidation(Account account) throws Exception {
+    private NetMessage signUpValidation(Account account) throws Exception {
 
         boolean valid = inputCheck(account);
 
@@ -63,7 +55,7 @@ public class AccountService {
         return null;
     }
 
-    public Optional<Account> signInValidation(Account account) throws Exception {
+    private Optional<Account> signInValidation(Account account) throws Exception {
 
         boolean valid = inputCheck(account);
 
@@ -131,12 +123,11 @@ public class AccountService {
      * @param account  *
      * @throws Exception *
      */
-    public void LogAccount(HttpServletRequest request, HttpServletResponse response, Account account) throws Exception {
+    private void LogAccount(HttpServletRequest request, HttpServletResponse response, Account account) throws Exception {
         String token = UUID.randomUUID().toString();
         CookieTool.setCookies(response, "ak_token", token);
         Account accountSession = new Account(account.getId(), account.getName());
         request.getSession().setAttribute("login_account", accountSession);
-        //记录位置
         Animal animal = animalService.getByAccount(accountSession);
         redisService.moveToLand(animal.getCurrentLand(), animal);
         redisService.addToken(token, accountSession);
