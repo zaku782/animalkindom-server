@@ -30,9 +30,9 @@ public class LandController {
     }
 
     @Resource
-    LandService landService;
+    private LandService landService;
     @Resource
-    AccountService accountService;
+    private AccountService accountService;
     @Resource
-    AnimalService animalService;
+    private AnimalService animalService;
 }

@@ -67,16 +67,18 @@ public class LandService {
         BitArray bitArray = new BitArray(landDiscovered);
         if (Arrays.stream(round).anyMatch(i -> i == landId) && bitArray.get(landId)) {
 
-            long last = animal.getMoveTime();
             long now = DateTool.getNowMillis();
-            long between = now - last;
+            Long last = animal.getMoveTime();
+
+            if (last != null) {
+                long between = now - last;
+                if (new BigDecimal(between).divide(new BigDecimal(1000), BigDecimal.ROUND_HALF_UP).intValue() < Integer.parseInt(gameConfig.get("landMoveInterval"))) {
+                    return new NetMessage(NetMessage.LAND_MOVE_WAIT, NetMessage.WARNING);
+                }
+            }
 
             String satietyCost = gameConfig.get("moveSatietyCost");
             String vigourCost = gameConfig.get("moveVigourCost");
-
-            if (new BigDecimal(between).divide(new BigDecimal(1000), BigDecimal.ROUND_HALF_UP).intValue() < Integer.parseInt(gameConfig.get("landMoveInterval"))) {
-                return new NetMessage(NetMessage.LAND_MOVE_WAIT, NetMessage.WARNING);
-            }
 
             Integer needSatiety = new BigDecimal(satietyCost).multiply(new BigDecimal(animal.getBaseSatiety())).intValue();
 
@@ -100,7 +102,7 @@ public class LandService {
         }
     }
 
-    public void move(Integer leave, Integer moveTo, Animal animal) {
+    private void move(Integer leave, Integer moveTo, Animal animal) {
         redisService.leaveLand(leave, animal);
         redisService.moveToLand(moveTo, animal);
     }
