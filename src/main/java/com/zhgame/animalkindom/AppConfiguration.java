@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.annotation.Resource;
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @Configuration
-public class AppConfiguration extends WebMvcConfigurerAdapter {
+public class AppConfiguration extends WebMvcConfigurationSupport {
 
     @Value("${system.env}")
     private String env;
@@ -89,11 +89,11 @@ public class AppConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Resource
-    AccountService accountService;
+    private AccountService accountService;
     @Resource
-    AnimalService animalService;
+    private AnimalService animalService;
     @Resource
-    RedisService redisService;
+    private RedisService redisService;
     @Resource
-    EventService eventService;
+    private EventService eventService;
 }

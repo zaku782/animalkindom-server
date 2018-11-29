@@ -14,8 +14,6 @@ spring:
   redis:
     host: 192.168.108.129
     port: 6379
-  rocketmq:
-    namesrvAddr: 192.168.108.129:9876
 
 server:
   compression.enabled: true
