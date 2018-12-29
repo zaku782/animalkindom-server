@@ -6,14 +6,15 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class Event {
 
-    private Long sender;
-    private String senderName;
-    private String senderSpecies;
-    private Long receiver;
-    private boolean readed;
-    private LocalDateTime dateTime;
-    private String type;
-    private boolean done;
+    Long sender;
+    String senderName;
+    String senderSpecies;
+    Long receiver;
+    boolean readed;
+    LocalDateTime sendTime;
+    LocalDateTime responseTime;
+    String type;
+    boolean done;
 
     public Long getSender() {
         return sender;
@@ -39,12 +40,20 @@ public class Event {
         this.readed = readed;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
+    public LocalDateTime getSendTime() {
+        return sendTime;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
+    public void setSendTime(LocalDateTime sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public LocalDateTime getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(LocalDateTime responseTime) {
+        this.responseTime = responseTime;
     }
 
     public String getSenderName() {

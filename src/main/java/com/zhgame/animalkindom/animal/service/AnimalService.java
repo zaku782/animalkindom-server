@@ -387,20 +387,23 @@ public class AnimalService {
         if (eventService.haveRequested(animal.getId(), Long.parseLong(toWho))) {
             return new NetMessage(NetMessage.WAIT_FOR_ANSWER, NetMessage.DANGER);
         }
-
         //记录到事件表中
-        FriendEvent event = new FriendEvent();
-        event.setSender(animal.getId());
-        event.setSenderName(animal.getAccountName());
-        event.setSenderSpecies(animal.getName());
-        event.setReceiver(Long.parseLong(toWho));
-        event.setReaded(false);
-        event.setDateTime(DateTool.getNowDateTime());
-        event.setType(FriendEvent.TYPE_FRIEND_REQUEST);
-        event.setDone(false);
+        FriendEvent event = new FriendEvent(
+                animal.getId(),
+                animal.getAccountName(),
+                animal.getName(),
+                Long.parseLong(toWho),
+                FriendEvent.TYPE_FRIEND_REQUEST);
         eventService.saveFriendEvent(event);
         //发送消息
-        WebSocketServer.sendInfo("friend_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
+        WebSocketServer.sendInfo("friend-make_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
+        return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
+    }
+
+    public NetMessage friendReject(Animal animal, String toWho) throws IOException {
+        eventService.friendReject(animal, toWho);
+        //发送消息
+        WebSocketServer.sendInfo("friend-reject_" + animal.getName() + "_" + animal.getAccountName() + "_" + animal.getId(), toWho);
         return new NetMessage(NetMessage.STATUS_OK, NetMessage.SUCCESS);
     }
 

@@ -104,6 +104,13 @@ public class AnimalController {
         return animalService.makeFriend(animal, animalId);
     }
 
+    @RequestMapping("/animal/friendReject/{animalId}")
+    public NetMessage friendReject(@PathVariable("animalId") String animalId, HttpServletRequest request) throws Exception {
+        Account account = accountService.getLoginAccount(request);
+        Animal animal = animalService.getByAccount(account);
+        return animalService.friendReject(animal, animalId);
+    }
+
     @Resource
     private AnimalService animalService;
     @Resource

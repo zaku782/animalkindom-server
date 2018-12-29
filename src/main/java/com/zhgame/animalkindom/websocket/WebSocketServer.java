@@ -17,8 +17,8 @@ import java.util.Map;
 @Component
 public class WebSocketServer {
 
-    static Log log = LogFactory.getLog(WebSocketServer.class);
-    public static Map<String, Session> sessions = new HashMap<>();
+    private static Log log = LogFactory.getLog(WebSocketServer.class);
+    private static Map<String, Session> sessions = new HashMap<>();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("animalId") String animalId) {
@@ -56,12 +56,10 @@ public class WebSocketServer {
 
     public static void sendInfo(String message, String animalId) throws IOException {
         Session session = sessions.get(animalId);
-        if (session != null) {
-            if (session.isOpen()) {
-                session.getBasicRemote().sendText(message);
-            } else {
-                sessions.remove(animalId);
-            }
+        if (session != null && session.isOpen()) {
+            session.getBasicRemote().sendText(message);
+        } else {
+            sessions.remove(animalId);
         }
     }
 
